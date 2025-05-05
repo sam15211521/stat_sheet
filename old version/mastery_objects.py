@@ -8,7 +8,7 @@ basic = Mastery(name ="Basic",
                discription= ["have a non-system amount of ability for that skill."],
                )
 beginner = Mastery(name ="Beginner",
-                   minimum_level= 1,
+                   minimum_level= 0,
                    maximum_level= 100,
                    requires_basic= False, 
                    multiplier= 1.5,
