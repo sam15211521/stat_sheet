@@ -1,4 +1,6 @@
-import statistics
+from statistics import mean
+import os
+from math import floor
 
 
 # all classes need a: name, mana_to_next_level, total_mana_invested, power, discription
@@ -43,6 +45,7 @@ class Attribute():
     @level.setter
     def level(self, level):
         self._level = level
+        self.power = 1 *(1.01 ** self.level)
    
     #getter and setter functions of _mana_to_next_level
     @property
@@ -86,6 +89,7 @@ class Attribute():
     def number_of_attributes(self):
         return self._attribute_dictionary
     
+    
 
 
 class MajorStat(Attribute):
@@ -124,29 +128,46 @@ class Stat(Attribute):
     def child_stats(self):
         return self._child_stats
     
-    def add_child_stat(self, stat):
-        if self.isparent and isinstance(stat, Stat):
-            self._child_stats[stat.name] = stat
-            if stat.isparent:
-                children = []
-                for key in stat.child_stats.keys():
-                    print('helloakdk', key)
-                    children.append(key)
-                print(f'{stat.name} is a Parent stat\n it children are:\n{', '.join(children)}')
-        elif not self.isparent:
-            print(f"\n<{self.name}> is a Child Stat\n")
-            return
-        else:
-            print(f'\nThe added stat <{stat.name}> is not a Child Stat\n')
-    
     @property
     def parent_stat(self):
         return self._parent_stat
     
     @parent_stat.setter
     def parent_stat(self, parent):
-        if not self._isparent:
-            print('isnotparent')
+        self._parent_stat = parent
+
+    
+    @property
+    def level(self):
+        if self.isparent:
+            #self._level = floor(self.average_values())
+            return self._level
+        else:
+            return self._level
+    
+    @ level.setter
+    def level(self, level=None):
+        if self.isparent:
+            self._level = floor(self.average_values())
+            
+        else:
+            self._level = level
+
+    
+    def add_child_stat(self, stat):
+        if self.isparent and isinstance(stat, Stat):
+            stat.parent_stat = self
+            self._child_stats[stat.name] = stat
+            #if stat.isparent:
+                #children = []
+                #for key in stat.child_stats.keys():
+                    #children.append(key)
+        elif not self.isparent:
+            print(f"\n<{self.name}> is a Child Stat\n")
+            return
+        else:
+            print(f'\nThe added stat <{stat.name}> is not a Child Stat\n')
+    
     
     def print_child_stats(self):
         print(f'the Child Stats of {self.name} are:')
@@ -155,6 +176,19 @@ class Stat(Attribute):
         else:
             for name, stat in self.child_stats.items():
                 print(f'Name: {name}, Level: {stat.level}')
+    
+    # used to calculate the level of a parent stat based on 
+    # the average of the levels of the childstats
+    def average_values(self):
+        return mean(stat.level for name, stat in self.child_stats.items())
+    
+    def level_overide(self, level_increase):
+        for stat in self.child_stats.values():
+            if stat.isparent:
+                stat.level_overide(level_increase)
+            else:
+                stat._level += level_increase 
+        pass
 
 
 
@@ -163,18 +197,27 @@ class Skill(Attribute):
     pass
 
 
+os.system('cls')
 a = Attribute(name = 'a')
 b = Stat(name = 'b', isparent=True)
-c = Stat(name = 'c', isparent=True)
-d = Stat(name = 'd')
-c1 = Stat(name= 'c1')
+b1 = Stat(name= 'b1')
+b2 = Stat(name= 'b2', isparent=True)
 
-c.add_child_stat(c1)
-b.add_child_stat(c)
-b.add_child_stat(d)
+b2_1 = Stat(name= 'b2_1')
+b2_2 = Stat(name = 'b2_2')
+b2_3 = Stat(name= 'b2_3')
 
+b.add_child_stat(b1)
+b.add_child_stat(b2)
 
-a.name= "we"
-a.discription = "we the people"
+b2.add_child_stat(b2_1)
+b2.add_child_stat(b2_2)
+b2.add_child_stat(b2_3)
 
-b.print_child_stats()
+b1.level = 5
+b2_1.level = 4
+b2_2.level = 1
+b2_3.level = 8
+print('b2-1', b2_1.level)
+print('b2',b2.level)
+print('b', b.level)
