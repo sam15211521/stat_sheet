@@ -157,14 +157,12 @@ class Stat(Attribute):
 
     
     def add_child_stat(self, stat):
-        if self.isparent and isinstance(stat, Stat):
-            stat.parent_stat = self
+        if isinstance(stat, Stat):
+            self.isparent = True
+            stat.paretn_stat = self
             self._child_stats[stat.name] = stat
-        elif not self.isparent:
-            print(f"\n<{self.name}> is a Child Stat\n")
-            return
         else:
-            print(f'\nThe added stat <{stat.name}> is not a Child Stat\n')
+            print(f'\nThe added instance <{stat}> is not a class Stat\n')
     
     
     def print_child_stats(self):
@@ -200,7 +198,7 @@ class Skill(Attribute):
     def level(self, level):
         self._level = level
         self.power = None
-        self.master = None
+        self.mastery = None
     
     @property
     def basics(self):
@@ -217,7 +215,7 @@ class Skill(Attribute):
         return self._mastery
     
     @mastery.setter
-    def mastery(self):
+    def mastery(self, mastery):
         if not self.basics:
             if self.level == 0:
                 self._mastery = basic
@@ -234,48 +232,3 @@ class Skill(Attribute):
                 self._master = master
 
 os.system('cls')
-
-    
-
-
-
-skill = Skill(name ='cutting')
-
-os.system('cls')
-a = Attribute(name = 'a')
-b = Stat(name = 'b', isparent=True)
-b1 = Stat(name= 'b1')
-b2 = Stat(name= 'b2', isparent=True)
-
-b2_1 = Stat(name= 'b2_1')
-b2_2 = Stat(name = 'b2_2')
-b2_3 = Stat(name= 'b2_3')
-
-b.add_child_stat(b1)
-b.add_child_stat(b2)
-
-b2.add_child_stat(b2_1)
-b2.add_child_stat(b2_2)
-b2.add_child_stat(b2_3)
-
-b.level = 2
-b1.level = 9
-b2.level = 2
-b2_1.level = 8
-b2_2.level = 8
-b2_3.level = 8
-
-print(f'{b.name}: {b.level}')
-print(f'{b1.name}: {b1.level}')
-print(f'{b2.name}: {b2.level}')
-print(f'{b2_1.name}: {b2_1.level}')
-print(f'{b2_2.name}: {b2_2.level}')
-print(f'{b2_3.name}: {b2_3.level}')
-
-print('#\n\n')
-
-print(skill.mastery.name, skill.level, skill.basics)
-skill.level = 4
-print(skill.mastery.name, skill.level, skill.basics)
-print('\n\n')
-
