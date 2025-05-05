@@ -1,7 +1,7 @@
 from statistics import mean
 import os
 from math import floor
-
+from mastery import Mastery, basic, beginner, intermediate, expert, master
 
 # all classes need a: name, mana_to_next_level, total_mana_invested, power, discription
 
@@ -25,8 +25,7 @@ class Attribute():
         line1 = f"{self.name} | Level: {self.level} "
         line2 = f"mana to next level: {self.mana}"
         line3 = self.discription
-        both_lines = line1 +'\n' + line2
-        return both_lines
+        return "\n".join([line1, line2, line3])
     
     #getter and setter functions of _name
     @property
@@ -73,7 +72,7 @@ class Attribute():
     
     @power.setter
     def power(self, power):
-        self._power = power
+        self._power = 1.01 ** self.level
     
     #getter and setter of the discription
     @property
@@ -147,21 +146,20 @@ class Stat(Attribute):
     
     @ level.setter
     def level(self, level=None):
-        if self.isparent:
-            self._level = floor(self.average_values())
-            
-        else:
+        if not self.isparent:
             self._level = level
+            if isinstance(self.parent_stat, Stat):
+                self.parent_stat.level = None #just need it to equal to something
+        else:
+            self._level = floor(self.average_levels())
+            if isinstance(self.parent_stat, Stat):
+                self.parent_stat.level = None
 
     
     def add_child_stat(self, stat):
         if self.isparent and isinstance(stat, Stat):
             stat.parent_stat = self
             self._child_stats[stat.name] = stat
-            #if stat.isparent:
-                #children = []
-                #for key in stat.child_stats.keys():
-                    #children.append(key)
         elif not self.isparent:
             print(f"\n<{self.name}> is a Child Stat\n")
             return
@@ -179,23 +177,69 @@ class Stat(Attribute):
     
     # used to calculate the level of a parent stat based on 
     # the average of the levels of the childstats
-    def average_values(self):
+    def average_levels(self):
         return mean(stat.level for name, stat in self.child_stats.items())
     
     def level_overide(self, level_increase):
-        for stat in self.child_stats.values():
-            if stat.isparent:
-                stat.level_overide(level_increase)
-            else:
-                stat._level += level_increase 
         pass
-
-
-
+        
 
 class Skill(Attribute):
-    pass
+    def __init__(self, name='', discription=''):
+        super().__init__(name, discription)
+        self._basics = False
+        self._mastery = basic
+        self._tagged_stats = {}
+        self._stat_multiplier = self.mastery.multiplier
+    
+    @property
+    def level(self):
+        return self._level
+   
+    @level.setter
+    def level(self, level):
+        self._level = level
+        self.power = None
+        self.master = None
+    
+    @property
+    def basics(self):
+        return self._basics
+    @basics.setter
+    def basics(self, basics):
+        if isinstance(basics, bool):
+            self._basics = basics
+        else:
+            print(f'Error: {self.name}.basics.setter :\nthe value <{basics}> is not type bool')
+    
+    @property
+    def mastery(self):
+        return self._mastery
+    
+    @mastery.setter
+    def mastery(self):
+        if not self.basics:
+            if self.level == 0:
+                self._mastery = basic
+            elif self.level > 0 and self.level <= 100:
+                self._mastery = beginner
+        else:
+            if self.level == 0:
+                self._mastery = beginner
+            elif self.level > 0 and self.level <= 109:
+                self._mastery = intermediate
+            elif self.level > 109 and self.level <= 1000:
+                self._mastery = expert
+            elif self.level > 1001 and self.level <= 10000:
+                self._master = master
 
+os.system('cls')
+
+    
+
+
+
+skill = Skill(name ='cutting')
 
 os.system('cls')
 a = Attribute(name = 'a')
@@ -214,10 +258,24 @@ b2.add_child_stat(b2_1)
 b2.add_child_stat(b2_2)
 b2.add_child_stat(b2_3)
 
-b1.level = 5
-b2_1.level = 4
-b2_2.level = 1
+b.level = 2
+b1.level = 9
+b2.level = 2
+b2_1.level = 8
+b2_2.level = 8
 b2_3.level = 8
-print('b2-1', b2_1.level)
-print('b2',b2.level)
-print('b', b.level)
+
+print(f'{b.name}: {b.level}')
+print(f'{b1.name}: {b1.level}')
+print(f'{b2.name}: {b2.level}')
+print(f'{b2_1.name}: {b2_1.level}')
+print(f'{b2_2.name}: {b2_2.level}')
+print(f'{b2_3.name}: {b2_3.level}')
+
+print('#\n\n')
+
+print(skill.mastery.name, skill.level, skill.basics)
+skill.level = 4
+print(skill.mastery.name, skill.level, skill.basics)
+print('\n\n')
+
