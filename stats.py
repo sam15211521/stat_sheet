@@ -1,5 +1,4 @@
 from statistics import mean
-import os
 from math import floor
 from mastery import basic, beginner, intermediate, expert, master
 
@@ -7,7 +6,10 @@ from mastery import basic, beginner, intermediate, expert, master
 
 class Attribute():
     _attribute_dictionary = {}
-    def __init__(self, name='', discription= ''):
+    def __init__(self, name='', 
+                 discription= '', 
+                 mana_multiplier =1,
+                 mana_capacity_flag = False):
         self._name = name
         self._level = 0
         
@@ -18,8 +20,10 @@ class Attribute():
 
         self._power = 1
         
+        self._mana_capasity_multiplier = mana_multiplier
 
         self._attribute_dictionary[self._name] = self
+        self._affects_mana_capacity = mana_capacity_flag
     
     def __str__(self):
         line1 = f"{self.name} | Level: {self.level} "
@@ -88,31 +92,50 @@ class Attribute():
     def number_of_attributes(self):
         return self._attribute_dictionary
     
-    
+    @property
+    def mana_capasity_multiplier(self):
+        return self._mana_capasity_multiplier
 
+    @mana_capasity_multiplier.setter
+    def mana_capasity_multiplier(self, value):
+        self._mana_capasity_multiplier = value
+    
+    @property
+    def affects_mana_capacity(self):
+        return self._affects_mana_capacity
+    @affects_mana_capacity.setter
+    def affects_mana_capacity(self, flag):
+        if isinstance(flag, bool):
+            self._affects_mana_capacity = flag
+    
+    def calculate_capacity_multiplier(self):
+        #need an initial value based on the type of skill
+        # will be multiplied by level
+        if self.affects_mana_capacity:
+            return self.mana_capasity_multiplier * 1.01 ** self.level
 
 class MajorStat(Attribute):
-    def __init__(self, name='', discription=''):
-        super().__init__(name, discription)
+    def __init__(self, name='', discription='', mana_multiplier= 1, mana_capacity_flag=False):
+        super().__init__(name, discription, mana_multiplier, mana_capacity_flag)
 
 class CondensedMana(MajorStat):
-    def __init__(self, name='', discription=''):
-        super().__init__(name, discription)
+    def __init__(self, name='', discription='', mana_multiplier=1,mana_capacity_flag=False):
+        super().__init__(name, discription, mana_multiplier, mana_capacity_flag)
     
     def __str__(self):
         return_string = f"Con Mana: {self.level}"
         return return_string
-
 
 class Stat(Attribute):
     def __init__(self, 
                  name='',
                  discription='', 
                  isparent = False,
-                 childstats = {}
-
+                 childstats = {},
+                 mana_multiplier=1, 
+                 mana_capacity_flag=False
                  ):
-        super().__init__(name, discription)
+        super().__init__(name, discription, mana_multiplier, mana_capacity_flag)
         
         self._acronym = self.name[:3]
 
@@ -164,13 +187,14 @@ class Stat(Attribute):
                 self.parent_stat.level = None
 
     
-    def add_child_stat(self, stat):
-        if isinstance(stat, Stat):
-            self.isparent = True
-            stat.paretn_stat = self
-            self._child_stats[stat.name] = stat
-        else:
-            print(f'\nThe added instance <{stat}> is not a class Stat\n')
+    def add_child_stat(self, *args):
+        for stat in args:
+            if isinstance(stat, Stat):
+                self.isparent = True
+                stat.paretn_stat = self
+                self._child_stats[stat.name] = stat
+            else:
+                print(f'\nThe added instance <{stat}> is not a class Stat\n')
     
     
     def print_child_stats(self):
@@ -188,11 +212,10 @@ class Stat(Attribute):
     
     def level_overide(self, level_increase):
         pass
-        
 
 class Skill(Attribute):
-    def __init__(self, name='', discription=''):
-        super().__init__(name, discription)
+    def __init__(self, name='', discription='', mana_multiplier=1, mana_capacity_flag=False):
+        super().__init__(name, discription, mana_multiplier, mana_capacity_flag)
         self._basics = False
         self._mastery = basic
         self._tagged_stats = {}
@@ -228,14 +251,31 @@ class Skill(Attribute):
             if self.level == 0:
                 self._mastery = basic
             elif self.level > 0 and self.level <= 100:
-                self._mastery = beginner
+                if self.mastery.name != beginner.name:
+                    self._mastery = beginner
+                    self.calculate_capacity_multiplier()
         else:
             if self.level == 0:
-                self._mastery = beginner
+                if self.mastery.name != beginner.name:
+                    self._mastery = beginner
+                    self.calculate_capacity_multiplier()
             elif self.level > 0 and self.level <= 109:
-                self._mastery = intermediate
+                if self.mastery.name != intermediate.name:
+                    self._mastery = intermediate
+                    self.calculate_capacity_multiplier()
             elif self.level > 109 and self.level <= 1000:
-                self._mastery = expert
+                if self.mastery.name != expert.name:
+                    self._mastery = expert
+                    self.calculate_capacity_multiplier()
             elif self.level > 1001 and self.level <= 10000:
-                self._master = master
-
+                if self.mastery.name != master.name:
+                    self._master = master
+                    self.calculate_capacity_multiplier()
+    
+    def calculate_capacity_multiplier(self):
+        #need an initial value based on the type of skill
+        # will be multiplied by level
+        #mastery multiplier will 
+        if self.affects_mana_capacity:
+            return self.mana_capasity_multiplier * 1.01 ** (self.level* self.mastery.multiplier)
+    
