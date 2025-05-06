@@ -16,21 +16,25 @@ class Character():
         self._condensed_mana = CondensedMana("Condensed Mana")
         self._total_condensed_mana = MajorStat("Total Condensed Mana")
 
-        self._hidden_mana_stat = MajorStat("Base Mana capacity")
+        self._hidden_mana_stat = MajorStat("Base Mana capacity", 
+                                           mana_capacity_flag=True)
+        self._stat_and_skills_effecting_mana = {}
 
         #regular stats
         
         #Strength
         self.strength = Stat(name = "Strength", isparent=True)
         self.physical_strength = Stat(name = "Physical Strength")
-        self.magical_strength = Stat(name = "Mana Strength")
+        self.magical_strength = Stat(name = "Mana Strength",
+                                     mana_capacity_flag=True)
         self.strength.add_child_stat(self.physical_strength, 
                                      self.magical_strength)
 
         #Resistance
         self.resistance = Stat(name="Resistance", isparent=True)
         self.physical_resistance = Stat(name="Physical Resistance")
-        self.magic_resistance = Stat(name="Mana Resistance")
+        self.magic_resistance = Stat(name="Mana Resistance",
+                                     mana_capacity_flag=True)
         self.spiritual_resistance = Stat(name="Spiritual Resistance")
         self.resistance.add_child_stat(self.physical_resistance,
                                        self.magic_resistance,
@@ -39,14 +43,16 @@ class Character():
         #Regeneration
         self.regeneration = Stat(name="Regeneration", isparent=True)
         self.health_regen = Stat(name="Health Regeneration")
-        self.mana_regen= Stat(name="Mana Regeneration")
+        self.mana_regen= Stat(name="Mana Regeneration",
+                              mana_capacity_flag=True)
         self.regeneration.add_child_stat(self.health_regen,
                                          self.mana_regen)
         
         #Endurance
         self.endurance = Stat(name="Endurance", isparent=True)
         self.physical_endurance = Stat(name="Physical Endurance")
-        self.magic_endurance = Stat(name="Magic_Endurance")
+        self.magic_endurance = Stat(name="Magic_Endurance",
+                                    mana_capacity_flag=True)
         self.endurance.add_child_stat(self.physical_endurance,
                                       self.magic_endurance)
         
@@ -58,7 +64,15 @@ class Character():
                                     self.coordination)
         
         #Energy potential
-        self.energy_potential = Stat(name= "Energy Potential")
+        self.energy_potential = Stat(name= "Energy Potential", 
+                                     mana_capacity_flag=True)
+
+        self.add_stat_to_mana_calc(self.hidden_mana_stat, 
+                                   self.magic_endurance,
+                                   self.magic_resistance,
+                                   self.mana_regen,
+                                   self.energy_potential,
+                                   self.magical_strength,)
     
     def __str__(self):
         string = f"""
@@ -133,8 +147,8 @@ class Character():
     def level(self):
         return self._level
     @level.setter
-    def level(self, mana):
-        self._level = mana
+    def level(self, level):
+        self._level = level
 
     @property
     def condensed_mana(self):
@@ -149,7 +163,20 @@ class Character():
     @total_condensed_mana.setter
     def total_condensed_mana(self, mana):
         self._total_condensed_mana = mana
+    @property
+    def hidden_mana_stat(self):
+        return self._hidden_mana_stat
+    @hidden_mana_stat.setter
+    def hidden_mana_stat(self, mana):
+        self._hidden_mana_stat = mana
 
+    @property
+    def stat_and_skills_effecting_mana(self):
+        return self._stat_and_skills_effecting_mana
+    @stat_and_skills_effecting_mana.setter
+    def stat_and_skills_effecting_mana(self, stat):
+        self._stat_and_skills_effecting_mana = stat
+    
     @property
     def template(self):
         return self._template
@@ -171,7 +198,25 @@ class Character():
                                 "level": killed.level.level,
             }
     
+    def add_skill_to_mana_calc(self, *args):
+        for skill in args:
+            if isinstance(skill, Skill):
+                self.stat_and_skills_effecting_mana[skill.name] = skill
+    def add_stat_to_mana_calc(self, *args):
+        for stat in args:
+            if isinstance(stat, Stat):
+                self.stat_and_skills_effecting_mana[stat.name] = stat
+        
+        
+    
     def calculate_max_mana(self):
+        #max mana is based on first the body's iniate abilities
+        #average is 2 
+        initial = self.hidden_mana_stat
+        #max mana based on the <hidden>, <magic_resistance>,
+        #<magic_endurance>, <magic_regeneration>, <Energy Potential>
+        #and misc skills that will add to the calculation. 
+        #need to make a dict of the stats and skills that effect it
 
 
 
@@ -180,7 +225,3 @@ class Character():
 
 ben = Character("Ben")
 monster = Character(name="Mana Condensate", race="Mana Condensate")
-ben.kills_character(monster)
-print(ben.dict_of_kills)
-
-print(ben)
