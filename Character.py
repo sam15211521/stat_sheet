@@ -15,11 +15,58 @@ class Character():
         self._level = MajorStat("Level")
         self._condensed_mana = CondensedMana("Condensed Mana")
         self._total_condensed_mana = MajorStat("Total Condensed Mana")
+
+        self._hidden_mana_stat = MajorStat("Base Mana capacity")
+
+        #regular stats
+        
+        #Strength
+        self.strength = Stat(name = "Strength", isparent=True)
+        self.physical_strength = Stat(name = "Physical Strength")
+        self.magical_strength = Stat(name = "Mana Strength")
+        self.strength.add_child_stat(self.physical_strength, 
+                                     self.magical_strength)
+
+        #Resistance
+        self.resistance = Stat(name="Resistance", isparent=True)
+        self.physical_resistance = Stat(name="Physical Resistance")
+        self.magic_resistance = Stat(name="Mana Resistance")
+        self.spiritual_resistance = Stat(name="Spiritual Resistance")
+        self.resistance.add_child_stat(self.physical_resistance,
+                                       self.magic_resistance,
+                                       self.spiritual_resistance)
+        
+        #Regeneration
+        self.regeneration = Stat(name="Regeneration", isparent=True)
+        self.health_regen = Stat(name="Health Regeneration")
+        self.mana_regen= Stat(name="Mana Regeneration")
+        self.regeneration.add_child_stat(self.health_regen,
+                                         self.mana_regen)
+        
+        #Endurance
+        self.endurance = Stat(name="Endurance", isparent=True)
+        self.physical_endurance = Stat(name="Physical Endurance")
+        self.magic_endurance = Stat(name="Magic_Endurance")
+        self.endurance.add_child_stat(self.physical_endurance,
+                                      self.magic_endurance)
+        
+        #Agility
+        self.agility = Stat(name="Agility", isparent=True)
+        self.speed = Stat(name="Speed")
+        self.coordination = Stat(name="Coordination")
+        self.agility.add_child_stat(self.speed, 
+                                    self.coordination)
+        
+        #Energy potential
+        self.energy_potential = Stat(name= "Energy Potential")
     
     def __str__(self):
         string = f"""
 {self.name} | {self.level.name}: {self.level.level}| {self.condensed_mana.name}: {self.condensed_mana.level}
 {self.health.name}: {self.health.level}/{self.max_health.level} | Mana: {self.current_mana.level}/{self.max_mana.level}
+{self.resistance.name}: {self.resistance.level} | {self.strength.name}: {self.strength.level}
+{self.regeneration.name}: {self.regeneration.level} | {self.endurance.name}: {self.endurance.level}
+{self.energy_potential.name}: {self.energy_potential.level} | {self.agility.name}: {self.agility.level}
 """
         return string
     
@@ -118,13 +165,22 @@ class Character():
     
     def kills_character(self, killed):
         if isinstance(killed, Character):
+            dict_of_the_killed ={
+                                "name": killed.name,
+                                "race": killed.race,
+                                "level": killed.level.level,
+            }
+    
+    def calculate_max_mana(self):
 
-            self.dict_of_kills[killed.name] = killed
-            pass
+
+
     
 
 
 ben = Character("Ben")
 monster = Character(name="Mana Condensate", race="Mana Condensate")
-print(monster.__dict__)
+ben.kills_character(monster)
+print(ben.dict_of_kills)
+
 print(ben)
