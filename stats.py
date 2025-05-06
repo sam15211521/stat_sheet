@@ -1,7 +1,7 @@
 from statistics import mean
 import os
 from math import floor
-from mastery import Mastery, basic, beginner, intermediate, expert, master
+from mastery import basic, beginner, intermediate, expert, master
 
 # all classes need a: name, mana_to_next_level, total_mana_invested, power, discription
 
@@ -94,6 +94,14 @@ class Attribute():
 class MajorStat(Attribute):
     def __init__(self, name='', discription=''):
         super().__init__(name, discription)
+
+class CondensedMana(MajorStat):
+    def __init__(self, name='', discription=''):
+        super().__init__(name, discription)
+    
+    def __str__(self):
+        return_string = f"Con Mana: {self.level}"
+        return return_string
 
 
 class Stat(Attribute):
@@ -231,4 +239,3 @@ class Skill(Attribute):
             elif self.level > 1001 and self.level <= 10000:
                 self._master = master
 
-os.system('cls')

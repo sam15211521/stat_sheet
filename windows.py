@@ -8,19 +8,18 @@ from PySide6.QtGui import *
 from stats import Stat
 
 
-class Stat_Window(QtWidgets.QMainWindow):
+class Stat_Window(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setwindowtitle = "Character Stats"
         
-        strength = Stat('strength')
         widget = QWidget()
-        label = QLabel()
-        label.setText(', '.join([str(val) for val in [strength.name, 
-                                                      strength.level]]))
+        self.setCentralWidget(widget)
 
+class Character_Stat_Screen(QFrame):
+    def __init__(self):
+        super().__init__()
 
-        self.setCentralWidget(label)
 
 app = QApplication()
 window = Stat_Window()
