@@ -2,8 +2,9 @@ from stats import MajorStat, Stat ,Skill, CondensedMana
 
 class Character():
     _dict_of_characters = {} 
-    def __init__(self, name = '', race = ''):
+    def __init__(self, name = '', race = '', body_mana_multiplier = 1):
         self._dict_of_kills = {}
+        self._dict_of_skills = {}
         self._name = name
         self._race = race
 
@@ -17,7 +18,8 @@ class Character():
         self._total_condensed_mana = MajorStat("Total Condensed Mana")
 
         self._hidden_mana_stat = MajorStat("Base Mana capacity", 
-                                           mana_capacity_flag=True)
+                                           mana_capacity_flag=True,
+                                           mana_multiplier=body_mana_multiplier)
         self._stat_and_skills_effecting_mana = {}
 
         #regular stats
@@ -26,7 +28,8 @@ class Character():
         self.strength = Stat(name = "Strength", isparent=True)
         self.physical_strength = Stat(name = "Physical Strength")
         self.magical_strength = Stat(name = "Mana Strength",
-                                     mana_capacity_flag=True)
+                                     mana_capacity_flag=True,
+                                     mana_multiplier=1.5)
         self.strength.add_child_stat(self.physical_strength, 
                                      self.magical_strength)
 
@@ -70,9 +73,10 @@ class Character():
         self.add_stat_to_mana_calc(self.hidden_mana_stat, 
                                    self.magic_endurance,
                                    self.magic_resistance,
+                                   self.magical_strength,
                                    self.mana_regen,
                                    self.energy_potential,
-                                   self.magical_strength,)
+                                    )
     
     def __str__(self):
         string = f"""
@@ -184,6 +188,12 @@ class Character():
     def template(self, mana):
         self._template = mana
     
+    def add_skill(self, skill):
+        if isinstance(skill, Skill):
+            self._dict_of_skills[skill.name] = skill
+            if skill.affects_mana_capacity:
+                self.add_skill_to_mana_calc(skill)
+    
     def use_conensed_mana(self, amount):
         self.condensed_mana.level -= amount
 
@@ -217,6 +227,17 @@ class Character():
         #<magic_endurance>, <magic_regeneration>, <Energy Potential>
         #and misc skills that will add to the calculation. 
         #need to make a dict of the stats and skills that effect it
+        stat_multipliers = []
+        skill_multipliers = []
+        for name, stat_skill in self.stat_and_skills_effecting_mana.items():
+            if isinstance(stat_skill, Stat):
+                print(name)
+
+                pass
+            
+            elif isinstance(stat_skill, Skill):
+                print(name)
+                pass
 
 
 
@@ -225,3 +246,9 @@ class Character():
 
 ben = Character("Ben")
 monster = Character(name="Mana Condensate", race="Mana Condensate")
+print(ben.stat_and_skills_effecting_mana.keys())
+ben.add_skill(Skill(name='Mana Circulation',mana_capacity_flag=True))
+print(ben.stat_and_skills_effecting_mana.keys())
+
+
+#ben.calculate_max_mana()
