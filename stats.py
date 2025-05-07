@@ -49,6 +49,7 @@ class Attribute():
     def level(self, level):
         self._level = level
         self.power = 1 *(1.01 ** self.level)
+        self.calculate_capacity_multiplier()
    
     #getter and setter functions of _mana_to_next_level
     @property
@@ -112,7 +113,7 @@ class Attribute():
         #need an initial value based on the type of skill
         # will be multiplied by level
         if self.affects_mana_capacity:
-            return self.mana_capasity_multiplier * 1.01 ** self.level
+            self.mana_capasity_multiplier= self.mana_capasity_multiplier * 1.01 ** self.level
 
 class MajorStat(Attribute):
     def __init__(self, name='', discription='', mana_multiplier= 1, mana_capacity_flag=False):
@@ -229,7 +230,8 @@ class Skill(Attribute):
     def level(self, level):
         self._level = level
         self.power = None
-        self.mastery = None
+        self.calculate_capacity_multiplier()
+        self.mastery= None
     
     @property
     def basics(self):
@@ -277,5 +279,4 @@ class Skill(Attribute):
         # will be multiplied by level
         #mastery multiplier will 
         if self.affects_mana_capacity:
-            return self.mana_capasity_multiplier * 1.01 ** (self.level* self.mastery.multiplier)
-    
+            self.mana_capasity_multiplier = round(self.mana_capasity_multiplier * 1.01 ** (self.level* self.mastery.multiplier),2)
