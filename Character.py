@@ -1,8 +1,9 @@
-from stats import MajorStat, Stat ,Skill, CondensedMana
+from stats import MajorStat, Stat ,Skill, CondensedMana, HiddenManaStat
+import math
 
 class Character():
     _dict_of_characters = {} 
-    def __init__(self, name = '', race = '', body_mana_multiplier = 1):
+    def __init__(self, name = '', race = '', body_mana_multiplier = 54433106):
         self._dict_of_kills = {}
         self._dict_of_skills = {}
         self._name = name
@@ -17,9 +18,10 @@ class Character():
         self._condensed_mana = CondensedMana("Condensed Mana")
         self._total_condensed_mana = MajorStat("Total Condensed Mana")
 
-        self._hidden_mana_stat = MajorStat("Base Mana capacity", 
-                                           mana_capacity_flag=True,
-                                           mana_multiplier=body_mana_multiplier)
+        self._hidden_mana_stat = HiddenManaStat("Base Mana Capacity", 
+                                           mana_capacity_flag=True,)
+        self.hidden_mana_stat.level = body_mana_multiplier
+        
         self._stat_and_skills_effecting_mana = {}
 
         #regular stats
@@ -68,15 +70,16 @@ class Character():
         
         #Energy potential
         self.energy_potential = Stat(name= "Energy Potential", 
-                                     mana_capacity_flag=True)
+                                     mana_capacity_flag=True,
+                                     mana_multiplier=1.5)
 
-        self.add_stat_to_mana_calc(self.hidden_mana_stat, 
+        self.add_stat_to_mana_calc(
                                    self.magic_endurance,
                                    self.magic_resistance,
                                    self.magical_strength,
                                    self.mana_regen,
-                                   self.energy_potential,
                                     )
+        self.calculate_max_mana()
     
     def __str__(self):
         string = f"""
@@ -182,6 +185,9 @@ class Character():
         self._stat_and_skills_effecting_mana = stat
     
     @property
+    def dict_of_skills(self):
+        return self._dict_of_skills
+    @property
     def template(self):
         return self._template
     @template.setter
@@ -226,29 +232,62 @@ class Character():
         #max mana based on the <hidden>, <magic_resistance>,
         #<magic_endurance>, <magic_regeneration>, <Energy Potential>
         #and misc skills that will add to the calculation. 
-        #need to make a dict of the stats and skills that effect it
-        stat_multipliers = []
-        skill_multipliers = []
-        for name, stat_skill in self.stat_and_skills_effecting_mana.items():
-            if isinstance(stat_skill, Stat):
-                print(name)
+        #average mana capacity of a person is 100 Mp 100,000,000 p
+        #a person with a mana deficiency has a capacity of 1 -5 Mp
+        #ben is 5000 p
 
-                pass
+        #numbers got crazy with exponential so now lets try 
+        # hiden * (stat_multiplier ** stat_multiplier.energy potential)
+        # average person's hidden stat needs to multiply to this: 54433106
+        stat_skill_multipliers = []
+        
+        for stat_skill in self.stat_and_skills_effecting_mana.values():
+            stat_skill_multipliers.append(stat_skill.mana_capasity_multiplier)
+        mana_multiplier = math.prod(stat_skill_multipliers)
+        mana_capacity = (self.hidden_mana_stat.level * (mana_multiplier** self.energy_potential.mana_capasity_multiplier))
+        if mana_capacity >1000000:
+            mana_capacity/= 1000000
+            self.max_mana.mana_unit = "Mp"
+            self.current_mana.mana_unit = "Mp"
+        elif mana_capacity <1000000 and mana_capacity >=20000:
+            mana_capacity /= 1000
+            self.max_mana.mana_unit ="kp"
+            self.current_mana.mana_unit = "kp"
+        elif mana_capacity < 20000:
+            self.max_mana.mana_unit = "p"
+            self.current_mana.mana_unit = "p"
+        self.max_mana.level = math.floor(mana_capacity)
+
+        print(self.max_mana.level, self.max_mana.mana_unit)
+
+        #self.max_mana.level = math.floor(mana_capacity)
+
+
+        
+        #print(stat_skill_multipliers)
+        #print('hidden', self.hidden_mana_stat.level)
+        #print("EP", self.energy_potential.mana_capasity_multiplier)
+        #print('multiplicitive:',mana_multiplier)
+        #print(f"mana capacity: {mana_capacity:,} {self.max_mana.mana_unit}")
+        
+
+
+        
+
+
             
-            elif isinstance(stat_skill, Skill):
-                print(name)
-                pass
-
 
 
     
 
-
-ben = Character("Ben")
+basicCharacter = Character('basicCharacter')
+ben = Character("Ben",body_mana_multiplier=2722) #hiden stat = 15.327
 monster = Character(name="Mana Condensate", race="Mana Condensate")
-print(ben.stat_and_skills_effecting_mana.keys())
 ben.add_skill(Skill(name='Mana Circulation',mana_capacity_flag=True))
-print(ben.stat_and_skills_effecting_mana.keys())
+
+#ben.energy_potential.level = 10
+#ben.dict_of_skills['Mana Circulation'].level = 10
+
+#print(ben.max_mana.level)
 
 
-#ben.calculate_max_mana()
