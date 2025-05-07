@@ -113,11 +113,35 @@ class Attribute():
         #need an initial value based on the type of skill
         # will be multiplied by level
         if self.affects_mana_capacity:
-            self.mana_capasity_multiplier= self.mana_capasity_multiplier * 1.01 ** self.level
+            self.mana_capasity_multiplier= round(self.mana_capasity_multiplier * 1.01 ** self.level,2)
 
 class MajorStat(Attribute):
     def __init__(self, name='', discription='', mana_multiplier= 1, mana_capacity_flag=False):
         super().__init__(name, discription, mana_multiplier, mana_capacity_flag)
+        self._mana_unit = None
+    @property
+    def mana_unit(self):
+        return self._mana_unit
+    @mana_unit.setter
+    def mana_unit(self, unit):
+        self._mana_unit = unit
+
+
+
+class HiddenManaStat(Attribute):
+    def __init__(self, name='', discription='', mana_multiplier=1, mana_capacity_flag=False):
+        super().__init__(name, discription, mana_multiplier, mana_capacity_flag)
+    
+    def calculate_capacity_multiplier(self):
+        return None
+    
+    @property
+    def level(self):
+        return self._level
+    @level.setter
+    def level(self, level):
+        self._level = level
+        
 
 class CondensedMana(MajorStat):
     def __init__(self, name='', discription='', mana_multiplier=1,mana_capacity_flag=False):
@@ -186,6 +210,7 @@ class Stat(Attribute):
             self._level = floor(self.average_levels())
             if isinstance(self.parent_stat, Stat):
                 self.parent_stat.level = None
+        self.calculate_capacity_multiplier()
 
     
     def add_child_stat(self, *args):
