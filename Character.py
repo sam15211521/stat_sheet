@@ -6,6 +6,7 @@ class Character():
     def __init__(self, name = '', race = '', body_mana_multiplier = 54433106):
         self._dict_of_kills = {}
         self._dict_of_skills = {}
+        self._dict_of_stats = {}
         self._name = name
         self._race = race
 
@@ -80,6 +81,7 @@ class Character():
                                    self.mana_regen,
                                     )
         self.calculate_max_mana()
+        self.add_to_dict_stats_and_skills()
     
     def __str__(self):
         string = f"""
@@ -114,6 +116,12 @@ class Character():
     @dict_of_kills.setter
     def dict_of_character(self, name):
         self._dict_of_kills = name
+    @property
+    def dict_of_stats(self):
+        return self._dict_of_stats
+    @dict_of_stats.setter
+    def dict_of_stats(self, dict):
+        self._dict_of_stats = dict
 
     @property
     def race(self):
@@ -228,14 +236,12 @@ class Character():
     def calculate_max_mana(self):
         #max mana is based on first the body's iniate abilities
         #average is 2 
-        initial = self.hidden_mana_stat
         #max mana based on the <hidden>, <magic_resistance>,
         #<magic_endurance>, <magic_regeneration>, <Energy Potential>
         #and misc skills that will add to the calculation. 
         #average mana capacity of a person is 100 Mp 100,000,000 p
         #a person with a mana deficiency has a capacity of 1 -5 Mp
         #ben is 5000 p
-
         #numbers got crazy with exponential so now lets try 
         # hiden * (stat_multiplier ** stat_multiplier.energy potential)
         # average person's hidden stat needs to multiply to this: 54433106
@@ -258,7 +264,7 @@ class Character():
             self.current_mana.mana_unit = "p"
         self.max_mana.level = math.floor(mana_capacity)
 
-        print(self.max_mana.level, self.max_mana.mana_unit)
+        #print(self.max_mana.level, self.max_mana.mana_unit)
 
         #self.max_mana.level = math.floor(mana_capacity)
 
@@ -269,25 +275,74 @@ class Character():
         #print("EP", self.energy_potential.mana_capasity_multiplier)
         #print('multiplicitive:',mana_multiplier)
         #print(f"mana capacity: {mana_capacity:,} {self.max_mana.mana_unit}")
-        
+    
 
+    #stat should be the of the Stat class
+    # level should only be an integer
+    def add_to_dict_stats_and_skills(self, 
+                                     new_stat_name = '', #should only be a string
+                                     new_stat_flag = False,
+                                     new_stat_manipulate_mana=False,
+                                     is_parent = False,
+                                     add_to_parent = False,
+                                     set_parent = None, # will be a current stat self.stat
+                                     level = 0
+                                     ):
+        # if the dict is empty first populate with current stats
+        if not bool(self.dict_of_stats):
+            temp = [stat for stat in list(self.__dict__.values()) 
+                    if isinstance(stat, Stat) | isinstance(stat, CondensedMana)]
+            for stat in temp:
+                self.dict_of_stats[stat.name] = stat
+        #else add a new stat
+        elif bool(self.dict_of_stats):
+            if((new_stat_flag)  
+               &(isinstance(new_stat_name, str)) 
+               &(new_stat_manipulate_mana) 
+               &(is_parent) 
+               &(add_to_parent)  
+               &(isinstance(set_parent, Stat))
+               ):
+                char = {"(", ")", "\n", " "}
+                deliniator = "".join([c for c in new_stat_name if c not in char])
+                exec(f'self._{deliniator} = Stat(name = "{new_stat_name}", level = {level}, isparent =True, mana_capacity_flag = True)')
+                exec(f'self._{deliniator}.parent_stat = set_parent')
 
-        
-
-
+            elif((new_stat_flag)  
+               &(isinstance(new_stat_name, str)) 
+               &(new_stat_manipulate_mana) 
+               &(is_parent) 
+               ):
+               print('nothing')
             
 
 
-    
+            elif new_stat_flag & isinstance(new_stat_name, str):
+                new_stat_string = 'made it' 
+                print(new_stat_string)
+            else:
+                print("Sorry I cannot do that")
+
+
+    def increase_stat_level(self, stat=None, level=1):
+        quit_flag = False
+        if not isinstance(stat, Stat) or not isinstance(stat, Skill):
+            print( "Type Error: selected stat is not a type <Stat> or <Skill>.")
+            quit_flag = True
+        if not isinstance(level, int):
+            print( "Type Error: level can only increase by integer values")
+            quit_flag = True
+        if quit_flag:
+            return None
+        
+        if stat.name in self.dict_of_stats:
+            print('correct:', self.dict_of_stats[stat.name])
+
+
 
 basicCharacter = Character('basicCharacter')
 ben = Character("Ben",body_mana_multiplier=2722) #hiden stat = 15.327
 monster = Character(name="Mana Condensate", race="Mana Condensate")
 ben.add_skill(Skill(name='Mana Circulation',mana_capacity_flag=True))
 
-#ben.energy_potential.level = 10
-#ben.dict_of_skills['Mana Circulation'].level = 10
-
-#print(ben.max_mana.level)
-
-
+#ben.increase_stat_level()
