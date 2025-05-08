@@ -1,32 +1,23 @@
 import os
 import random
-import typer
-import tkinter as TK
-import inspect
-import inquirer
-from character_objects import *
+import pickle
+#from characters.ben import ben
 
 def clearscreen():
     os.system('cls')
-
-
-current_races= []
-
 ####################
 clearscreen()
+cur_path = os.path.dirname(__file__)
+file_path = 'characters/ben.dat'
+abs_file_path = os.path.join(cur_path, file_path)
+print("\n")
 
-print("\n\n\n")
+with open(abs_file_path, 'rb') as file:
+    loaded_data = pickle.load(file)
 
-for i in range(5):
-    enemy = Character(name= f'bug{i}', race= 'bug')
-    enemy.level.level= random.randint(1, 5) * 5
-    ben.kills_character(enemy)
+print(loaded_data)
 
 
-print (ben.get_kills())
-print(ben.strength)
-print(ben)
-print("\nend")
 
-print("\n\n\n")
+print("\n")
 

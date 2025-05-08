@@ -342,10 +342,6 @@ class Character():
             return None
         if stat.name in self.dict_of_stats and not stat.isparent:
             stat.level -= level
-    
-
-
-
 
 basicCharacter = Character('basicCharacter')
 ben = Character("Ben",body_mana_multiplier=2722) #hiden stat = 15.327
