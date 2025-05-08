@@ -6,6 +6,7 @@ class Character():
     def __init__(self, name = '', race = '', body_mana_multiplier = 54433106):
         self._dict_of_kills = {}
         self._dict_of_skills = {}
+        self._dict_of_major_stats = {}
         self._dict_of_stats = {}
         self._name = name
         self._race = race
@@ -81,7 +82,8 @@ class Character():
                                    self.mana_regen,
                                     )
         self.calculate_max_mana()
-        self.add_to_dict_stats_and_skills()
+        self.current_mana.level = self.max_mana.level
+        self.add_to_dict_stats_and_major_stats()
     
     def __str__(self):
         string = f"""
@@ -92,7 +94,8 @@ class Character():
 {self.energy_potential.name}: {self.energy_potential.level} | {self.agility.name}: {self.agility.level}
 """
         return string
-    
+   ##########################################################
+   # here are all the propertie setters 
     @property
     def name(self):
         return self._name
@@ -122,6 +125,14 @@ class Character():
     @dict_of_stats.setter
     def dict_of_stats(self, dict):
         self._dict_of_stats = dict
+    
+    @property
+    def dict_of_major_stats(self):
+        return self._dict_of_major_stats
+    @dict_of_stats.setter
+    def dict_of_major_stats(self, dict):
+        self._dict_of_major_stats = dict
+
 
     @property
     def race(self):
@@ -202,6 +213,9 @@ class Character():
     def template(self, mana):
         self._template = mana
     
+    ###########################################################
+    #other misc methods
+    
     def add_skill(self, skill):
         if isinstance(skill, Skill):
             self._dict_of_skills[skill.name] = skill
@@ -226,10 +240,13 @@ class Character():
         for skill in args:
             if isinstance(skill, Skill):
                 self.stat_and_skills_effecting_mana[skill.name] = skill
+                self.calculate_max_mana()
+
     def add_stat_to_mana_calc(self, *args):
         for stat in args:
             if isinstance(stat, Stat):
                 self.stat_and_skills_effecting_mana[stat.name] = stat
+                self.calculate_max_mana()
         
         
     
@@ -279,64 +296,54 @@ class Character():
 
     #stat should be the of the Stat class
     # level should only be an integer
-    def add_to_dict_stats_and_skills(self, 
-                                     new_stat_name = '', #should only be a string
-                                     new_stat_flag = False,
-                                     new_stat_manipulate_mana=False,
-                                     is_parent = False,
-                                     add_to_parent = False,
-                                     set_parent = None, # will be a current stat self.stat
-                                     level = 0
-                                     ):
-        # if the dict is empty first populate with current stats
-        if not bool(self.dict_of_stats):
-            temp = [stat for stat in list(self.__dict__.values()) 
-                    if isinstance(stat, Stat) | isinstance(stat, CondensedMana)]
-            for stat in temp:
-                self.dict_of_stats[stat.name] = stat
-        #else add a new stat
-        elif bool(self.dict_of_stats):
-            if((new_stat_flag)  
-               &(isinstance(new_stat_name, str)) 
-               &(new_stat_manipulate_mana) 
-               &(is_parent) 
-               &(add_to_parent)  
-               &(isinstance(set_parent, Stat))
-               ):
-                char = {"(", ")", "\n", " "}
-                deliniator = "".join([c for c in new_stat_name if c not in char])
-                exec(f'self._{deliniator} = Stat(name = "{new_stat_name}", level = {level}, isparent =True, mana_capacity_flag = True)')
-                exec(f'self._{deliniator}.parent_stat = set_parent')
+    def add_to_dict_stats_and_major_stats(self, major_stat = False):
+        if major_stat:
+            if not bool(self._dict_of_major_stats):
 
-            elif((new_stat_flag)  
-               &(isinstance(new_stat_name, str)) 
-               &(new_stat_manipulate_mana) 
-               &(is_parent) 
-               ):
-               print('nothing')
-            
+                temp = [stat for stat in list(self.__dict__.values()) 
+                        if isinstance(stat, Stat) | isinstance(stat, CondensedMana)]
 
+                for stat in temp:
+                    self._dict_of_major_stats[stat.name] = stat
+            print(self._dict_of_major_stats)
+        else:
+            if not bool(self.dict_of_stats):
 
-            elif new_stat_flag & isinstance(new_stat_name, str):
-                new_stat_string = 'made it' 
-                print(new_stat_string)
-            else:
-                print("Sorry I cannot do that")
+                temp = [stat for stat in list(self.__dict__.values()) 
+                        if isinstance(stat, Stat) | isinstance(stat, CondensedMana)]
 
+                for stat in temp:
+                    self.dict_of_stats[stat.name] = stat
 
     def increase_stat_level(self, stat=None, level=1):
         quit_flag = False
-        if not isinstance(stat, Stat) or not isinstance(stat, Skill):
+        if not isinstance(stat, Stat) and not isinstance(stat, Skill):
             print( "Type Error: selected stat is not a type <Stat> or <Skill>.")
+            print(f"is type {type(stat)}")
             quit_flag = True
         if not isinstance(level, int):
             print( "Type Error: level can only increase by integer values")
             quit_flag = True
         if quit_flag:
             return None
-        
-        if stat.name in self.dict_of_stats:
-            print('correct:', self.dict_of_stats[stat.name])
+        if stat.name in self.dict_of_stats and not stat.isparent:
+            stat.level += level
+    
+    def decrease_stat_level(self, stat=None, level=1):
+        quit_flag = False
+        if not isinstance(stat, Stat) and not isinstance(stat, Skill):
+            print("Type Error: selected stat is not a type <Stat> or <Skill>.")
+            print(f"is type {type(stat)}")
+            quit_flag = True
+        if not isinstance(level, int):
+            print("Type Error: level can only increase by integer values")
+            quit_flag = True
+        if quit_flag:
+            return None
+        if stat.name in self.dict_of_stats and not stat.isparent:
+            stat.level -= level
+    
+
 
 
 
@@ -345,4 +352,11 @@ ben = Character("Ben",body_mana_multiplier=2722) #hiden stat = 15.327
 monster = Character(name="Mana Condensate", race="Mana Condensate")
 ben.add_skill(Skill(name='Mana Circulation',mana_capacity_flag=True))
 
-#ben.increase_stat_level()
+ben.increase_stat_level(ben.physical_strength, 9)
+ben.increase_stat_level(ben.magical_strength, 10)
+ben.decrease_stat_level(ben.physical_strength, 4)
+print()
+#print(ben)
+#print(ben.physical_strength)
+#print(ben.magical_s
+#print(ben.strength)
