@@ -128,7 +128,7 @@ class MajorStat(Attribute):
         self._mana_unit = unit
     def __str__(self):
         if self.name == "Max Mana" or self.name == "Mana":
-            return f"{self.level:,} {self.mana_unit}"
+            return f"{self.name}: {self.level:,} {self.mana_unit}"
         else:
             return super().__str__()
 
@@ -171,6 +171,7 @@ class Stat(Attribute):
         self._isparent = isparent
         self._child_stats = {}
         self._parent_stat = None
+        self._power = 1
     
     @property
     def isparent(self):
@@ -200,6 +201,13 @@ class Stat(Attribute):
 
     
     @property
+    def power(self):
+        return self._power
+    @power.setter
+    def power(self, power):
+        self._power = round(1.01 ** self.level, 2)
+
+    @property
     def level(self):
         if self.isparent:
             #self._level = floor(self.average_values())
@@ -211,12 +219,14 @@ class Stat(Attribute):
     def level(self, level=None):
         if not self.isparent:
             self._level = level
+            self.power = None
             if isinstance(self.parent_stat, Stat):
                 self.parent_stat.level = None #just need it to equal to something
         else:
             self._level = floor(self.average_levels())
             if isinstance(self.parent_stat, Stat):
                 self.parent_stat.level = None
+                self.power = None
         self.calculate_capacity_multiplier()
 
     
@@ -224,7 +234,7 @@ class Stat(Attribute):
         for stat in args:
             if isinstance(stat, Stat):
                 self.isparent = True
-                stat.paretn_stat = self
+                stat.parent_stat = self
                 self._child_stats[stat.name] = stat
             else:
                 print(f'\nThe added instance <{stat}> is not a class Stat\n')
