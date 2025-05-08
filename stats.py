@@ -9,9 +9,10 @@ class Attribute():
     def __init__(self, name='', 
                  discription= '', 
                  mana_multiplier =1,
-                 mana_capacity_flag = False):
+                 mana_capacity_flag = False,
+                 level =0):
         self._name = name
-        self._level = 0
+        self._level = level
         
         self._mana_to_next_level = 1
         self._total_mana_used = 0
@@ -26,7 +27,7 @@ class Attribute():
         self._affects_mana_capacity = mana_capacity_flag
     
     def __str__(self):
-        line1 = f"{self.name} | Level: {self.level} "
+        line1 = f"{self.name} | Level: {self.level:,} "
         line2 = f"mana to next level: {self.mana}"
         line3 = self.discription
         return "\n".join([line1, line2, line3])
@@ -125,8 +126,11 @@ class MajorStat(Attribute):
     @mana_unit.setter
     def mana_unit(self, unit):
         self._mana_unit = unit
-
-
+    def __str__(self):
+        if self.name == "Max Mana" or self.name == "Mana":
+            return f"{self.level:,} {self.mana_unit}"
+        else:
+            return super().__str__()
 
 class HiddenManaStat(Attribute):
     def __init__(self, name='', discription='', mana_multiplier=1, mana_capacity_flag=False):
@@ -142,13 +146,12 @@ class HiddenManaStat(Attribute):
     def level(self, level):
         self._level = level
         
-
 class CondensedMana(MajorStat):
     def __init__(self, name='', discription='', mana_multiplier=1,mana_capacity_flag=False):
         super().__init__(name, discription, mana_multiplier, mana_capacity_flag)
     
     def __str__(self):
-        return_string = f"Con Mana: {self.level}"
+        return_string = f"Con Mana: {self.level:,}"
         return return_string
 
 class Stat(Attribute):
@@ -158,9 +161,10 @@ class Stat(Attribute):
                  isparent = False,
                  childstats = {},
                  mana_multiplier=1, 
-                 mana_capacity_flag=False
+                 mana_capacity_flag=False,
+                 level = 0
                  ):
-        super().__init__(name, discription, mana_multiplier, mana_capacity_flag)
+        super().__init__(name, discription, mana_multiplier, mana_capacity_flag, level)
         
         self._acronym = self.name[:3]
 
@@ -189,7 +193,10 @@ class Stat(Attribute):
     
     @parent_stat.setter
     def parent_stat(self, parent):
-        self._parent_stat = parent
+        if isinstance(parent, Stat):
+            self._parent_stat = parent
+        else:
+            print("ERROR parent stat needs to be class <Stat>")
 
     
     @property
