@@ -94,6 +94,17 @@ class Character():
 {self.energy_potential.name}: {self.energy_potential.level} | {self.agility.name}: {self.agility.level}
 """
         return string
+    
+    def __repr__(self):
+        string = f' {self.__dir__()}\n{self.name}\n'
+        
+        for key, item in self.__dict__.items():
+            if isinstance(item,Stat) or isinstance(item,MajorStat):
+                string += f'({item.name}, {item.level})\n'
+        return string
+
+
+
    ##########################################################
    # here are all the propertie setters 
     @property
@@ -343,15 +354,19 @@ class Character():
         if stat.name in self.dict_of_stats and not stat.isparent:
             stat.level -= level
 
-basicCharacter = Character('basicCharacter')
-ben = Character("Ben",body_mana_multiplier=2722) #hiden stat = 15.327
-monster = Character(name="Mana Condensate", race="Mana Condensate")
-ben.add_skill(Skill(name='Mana Circulation',mana_capacity_flag=True))
+#basicCharacter = Character('basicCharacter')
 
-ben.increase_stat_level(ben.physical_strength, 9)
-ben.increase_stat_level(ben.magical_strength, 10)
-ben.decrease_stat_level(ben.physical_strength, 4)
-print()
+ben = Character("Ben",body_mana_multiplier=2722) #hiden stat = 15.327
+print(ben.__repr__)
+print(ben)
+#monster = Character(name="Mana Condensate", race="Mana Condensate")
+#ben.add_skill(Skill(name='Mana Circulation',mana_capacity_flag=True))
+#
+#ben.increase_stat_level(ben.physical_strength, 9)
+#ben.increase_stat_level(ben.magical_strength, 10)
+#ben.decrease_stat_level(ben.physical_strength, 4)
+#print()
+#print(Character("Ben", "Human").__dict__)
 #print(ben)
 #print(ben.physical_strength)
 #print(ben.magical_s
