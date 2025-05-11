@@ -1,34 +1,77 @@
-class adkd():
-    def __init__(self, name, level, race):
-        self.name = name
-        self.race = race
-        self.level = level
-entry = adkd("cat", 5, 'cat')                                      
-#entry_structure = {entry.race: {'count': 1, 
-#                                'characters': {'level': {entry.level:{entry.name: {'information'}}}}}}
-                #the list       #the kind of enemy     #what level each was at # 
-#{what race:{how many, character: {level:{level:{name{information}}}}}}
-dic = {}
+import os
+import pickle
+import Character
+import sys
+from PySide6.QtCore import *
+from PySide6.QtWidgets import *
 
-def adding(entry):
-    global dic
-    if isinstance(entry, adkd):
-        if entry.race not in dic:
-            dic[entry.race] = {"count": 1, entry.name: entry.__dict__}
-        else:
-            dic[entry.race]['count'] = dic[entry.race]['count'] + 1 
-            dic[entry.race][entry.name] = entry.__dict__
-    else:
-        print('ERROR: entry must be of class <adkd>')
-            
-            
-first = adkd("cat1", 5, 'cat')
-first2 = adkd("cat2", 5, 'cat')
-second = adkd("dog1", 2, 'dog')
-second2 = adkd("dog2", 2, 'dog')
-adding(first)
-adding(first2)
-adding(second)
-adding(second2)
-for key, value in dic.items():
-    print(key, value) 
+basdir = os.path.dirname(__file__)
+
+
+
+
+class list_model(QAbstractListModel):
+    def __init__(self, lst={}):
+        super().__init__()
+        self._list = list(lst.keys()) or {}
+    
+    def data(self, index, role = ...):
+        if role == Qt.DisplayRole:
+            text = self._list[index.row()]
+            return text
+    
+    def rowCount(self, index):
+        return len(self._list)
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+
+        self.character_path_name ={"Ben": "here", "Cat": "There"}
+        super().__init__()
+        self.central_widget = QWidget(self)
+        self.setCentralWidget(self.central_widget)
+
+        self.model = list_model(self.character_path_name)
+        self.modelView = QListView()
+        self.modelView.setModel(self.model)
+
+        self.line_edit = QLineEdit()
+        self.quitbutton = QPushButton("Quit")
+        self.quitbutton.pressed.connect(self.close)
+
+
+        self.set_button = QPushButton("Set")
+        self.set_button.pressed.connect(self.add)
+
+
+
+
+
+
+        self.central_layout = QGridLayout()
+        self.central_widget.setLayout(self.central_layout)
+        self.central_layout.addWidget(QLabel("Hello"), 0,0)
+        self.central_layout.addWidget(self.modelView,1,0)
+        self.central_layout.addWidget(self.line_edit,2,0)
+        self.central_layout.addWidget(self.set_button,3,0)
+        self.central_layout.addWidget(self.quitbutton,4,0)
+
+    def add(self):
+        #adds an item to the model
+        text = self.line_edit.text()
+        text = text.strip()
+        if text:
+            self.model._list.append((False, text))
+            self.model.layoutChanged.emit()
+            self.line_edit.setText("")
+
+
+def main():
+    app = QApplication()
+    window = MainWindow()
+    window.show()
+
+    sys.exit(app.exec())
+
+if __name__ == '__main__':
+    main()
