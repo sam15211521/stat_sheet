@@ -356,9 +356,7 @@ class Character():
 
 #basicCharacter = Character('basicCharacter')
 
-ben = Character("Ben",body_mana_multiplier=2722) #hiden stat = 15.327
-print(ben.__repr__)
-print(ben)
+#ben = Character("Ben",body_mana_multiplier=2722) #hiden stat = 15.327
 #monster = Character(name="Mana Condensate", race="Mana Condensate")
 #ben.add_skill(Skill(name='Mana Circulation',mana_capacity_flag=True))
 #
