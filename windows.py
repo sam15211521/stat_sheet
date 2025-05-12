@@ -15,9 +15,21 @@ from Character import Character
 class MainWindow(QMainWindow):
     def __init__(self, character_sheet: dict):
         super().__init__()
+
+        current_working_dictionary = os.path.dirname(__file__)
+        self.save_folder = os.path.join(current_working_dictionary, 'characters')
+        self.character_dict_with_path_names = {}
+
+        self.load_character_path = ''
+        for character in os.listdir(self.save_folder):
+            if character.endswith(".dat"):
+                filepath = os.path.join(self.save_folder, character)
+                self.character_dict_with_path_names[character.removesuffix(".dat")] = filepath
+
+
         self._dict_of_stats = {}
-        self._dict_of_characters = {"Ben": Character("Ben", 'Human')}
-        self.character_list_names_model = list_model(self._dict_of_characters)
+        self._dict_of_loaded_characters = {}
+        self.character_list_names_model = list_model(self.character_dict_with_path_names)
         self.setwindowtitle = "Character Stats"
         central_widget = QWidget()
 
@@ -62,17 +74,9 @@ class MainWindow(QMainWindow):
         ### Menu addition ###
         file_menu.addAction(self.quit_action)
 
-        current_working_dictionary = os.path.dirname(__file__)
-        self.save_folder = os.path.join(current_working_dictionary, 'characters')
-
-        self.character_path_names = {}
-        self.load_character_path = ''
-        for character in os.listdir(self.save_folder):
-            if character.endswith(".dat"):
-                filepath = os.path.join(self.save_folder, character)
-                self.character_path_names[character.removesuffix(".dat")] = filepath
         
-        self.load_character_path = self.character_path_names['Ben']
+    def add_to_character_paths(self): #when a character is added gives a
+        pass# link to where the save data for it is
     
     def closeEvent(self, event):
         QApplication.closeAllWindows()
@@ -118,12 +122,22 @@ class CharacterSelectScreen(QMainWindow):
         self.central = QWidget()
         self._parent = parent
 
+        self.selected_character_label = QLabel()
+        self.selected_character_label.setObjectName("CharacterLabel")
+        self.selected_character_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.style_sheet = """QLabel#CharacterLabel {font-size: 20px; 
+                                                    border: 2px solid;
+                                                    }"""
+        self.setStyleSheet(self.style_sheet)
         self._model = self._parent._parent.character_list_names_model
         self.view_model = QListView()
         self.view_model.setModel(self._model)
+        self.view_model.clicked.connect(self.show_name_in_label)
 
         self.instructions = QLabel("Please select the character of wich you want to view stats")
         self.instructions.setWordWrap(True)
+
+
 
         #buttons
         self.close_button = QPushButton("Close")
@@ -134,18 +148,47 @@ class CharacterSelectScreen(QMainWindow):
         self.select_button.pressed.connect(self.select_name)
 
 
+
+
+        #self.select_button.pressed.connect()
+        #self.aproval_dialog_box()
+        
+
+
         #layout
         self.central_layout = QGridLayout()
         self.central_layout.addWidget(self.instructions,0,0)
-        self.central_layout.addWidget(self.view_model,1,0, 1, 2)
-        self.central_layout.addWidget(self.close_button, 2,1)
-        self.central_layout.addWidget(self.select_button,2,0)
+        self.central_layout.addWidget(self.view_model,2,0, 1, 2)
+        self.central_layout.addWidget(self.close_button, 3,1)
+        self.central_layout.addWidget(self.select_button,3,0)
+        self.central_layout.addWidget(self.selected_character_label, 1,0)
 
         self.central.setLayout(self.central_layout)
         self.setCentralWidget(self.central)
+    def print_result(self):
+        print(self.load_character_dialog.result())
+    def show_name_in_label(self):
+        self.selected_character_label.setText(self.view_model.currentIndex().data())
     
     def select_name(self):
         character_name = self.view_model.currentIndex().data()
+        character_datapath = self._parent._parent.character_dict_with_path_names
+        self.load_character_dialog.open()
+        
+    def aproval_dialog_box(self):
+        self.load_character_dialog = QDialog()
+
+        self.dialog_buttons = (QDialogButtonBox.Ok | QDialogButtonBox.No | QDialogButtonBox.Cancel)
+        self.dialog_button_box = QDialogButtonBox(self.dialog_buttons)
+
+        self.dialog_button_box.accepted.connect(self.load_character_dialog.accept)
+        self.dialog_button_box.rejected.connect(self.load_character_dialog.reject)
+
+        self.load_character_dialog_layout = QVBoxLayout()
+        self.load_character_dialog_layout.addWidget(self.dialog_button_box)
+        self.load_character_dialog.setLayout(self.load_character_dialog_layout)
+        if self.load_character_dialog.isVisible():
+            print(self.load_character_dialog.isVisible())
     
 
         
