@@ -88,6 +88,7 @@ class MainWindow(QMainWindow):
     def save(self):
         pass
     def load(self):
+        print(self.load_character_path)
         with open(self.load_character_path, 'rb') as file:
             return pickle.load(file)
 
@@ -98,6 +99,8 @@ class LeftWidget(QWidget):
         left_layout = QVBoxLayout(self)
         self._parent = parent
         self.setLayout(left_layout)
+
+        self.character_name = QLabel
 
         self.open_button = QPushButton("Select Character")
         self.open_button.setCheckable(True)
@@ -172,8 +175,11 @@ class CharacterSelectScreen(QMainWindow):
     
     def select_name(self):
         character_name = self.view_model.currentIndex().data()
-        character_datapath = self._parent._parent.character_dict_with_path_names
-        self.load_character_dialog.open()
+        character_datapath = self._parent._parent.character_dict_with_path_names[character_name]
+        self._parent._parent.load_character_path = character_datapath
+        file = self._parent._parent.load()
+        self._parent._parent._dict_of_loaded_characters[file.name] = file
+        self.close()
         
     def aproval_dialog_box(self):
         self.load_character_dialog = QDialog()
