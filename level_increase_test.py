@@ -28,20 +28,21 @@ class MainWindow(QMainWindow):
         self.usable_mana.valueChanged.connect(self.print_value)
 
 
-        self.mana_to_next_level = QLabel(f'Mana to next level: {self.stat.mana_to_next_level}')
-        self.total_mana = QLabel(f'Total Mana: {self.stat._total_mana_used}')
+        self.text_mana_to_next_level = QLabel(f'Mana to next level: {self.stat.mana_to_next_level}')
+        self.text_total_mana = QLabel(f'Total Mana: {self.stat._total_mana_used}')
 
         self.increase_level_button = QPushButton("Increase Level")
 
         self.central_layout.addWidget(self.usable_mana,0,0)
-        self.central_layout.addWidget(self.mana_to_next_level,1,0)
-        self.central_layout.addWidget(self.total_mana,2,0)
+        self.central_layout.addWidget(self.text_mana_to_next_level,1,0)
+        self.central_layout.addWidget(self.text_total_mana,2,0)
         self.central_layout.addWidget(self.increase_level_button,3,0)
 
     def print_value(self):
         print(self.usable_mana.value())
     
     def increase_level(self):
+        current_requirment = self.stat.mana_to_next_level
         pass
 
 #a = Stat("default")
