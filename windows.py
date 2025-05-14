@@ -29,13 +29,15 @@ class MainWindow(QMainWindow):
 
 
         self._dict_of_stats = {}
-        self._dict_of_loaded_characters = {"Maple":Character("Maple")}
+        self._dict_of_loaded_characters = {}
         self.character_list_names_model = list_model(self.character_dict_with_path_names)
         self.setwindowtitle = "Character Stats"
         central_widget = QWidget()
 
         #####left side of the screen
         self.left_widget = LeftWidget(self)
+
+        self.center_widget = CenterWidget(self)
 
        ###### Right side of the screen 
         self.right_widget = RightWidget(self)
@@ -60,6 +62,7 @@ class MainWindow(QMainWindow):
         central_layout = QGridLayout(central_widget)
         central_widget.setLayout(central_layout)
         central_layout.addWidget(self.left_widget,0,0)
+        central_layout.addWidget(self.center_widget,0,1)
         central_layout.addWidget(self.right_widget,0,2)
         central_layout.addWidget(self.exit_button,1,1)
         central_layout.addWidget(self.left_hide_button,1,0)
@@ -92,6 +95,21 @@ class MainWindow(QMainWindow):
         with open(self.load_character_path, 'rb') as file:
             return pickle.load(file)
 
+class CenterWidget(QWidget):
+    def __init__(self, parent : MainWindow): 
+        super().__init__()
+        self._parent = parent
+        self.setObjectName = "centerwidget"
+        self.center_layout = QGridLayout(self)
+        self.setLayout(self.center_layout)
+
+        self.new_character_button = QPushButton("Create New Character")
+
+
+
+        self.center_layout.addWidget(self.new_character_button)
+
+    
 
 class LeftWidget(QWidget):
     def __init__(self, parent: MainWindow):
@@ -219,6 +237,8 @@ class RightWidget(QWidget):
 
         self.character_select_button = QPushButton('Select Character')
         self.character_select_button.clicked.connect(self.select_character)
+        self.character_select_button.setDisabled(True)
+        self.right_text.itemSelectionChanged.connect(self.character_selection)
         
         self.right_layout.addWidget(self.right_text,0,0)
         self.right_layout.addWidget(self.character_select_button,1,0)
@@ -235,6 +255,10 @@ class RightWidget(QWidget):
         current_character = self._parent._dict_of_loaded_characters[character_name]
         self.dict_of_stat_windows[character_name] = Character_screen(current_character)
         self.dict_of_stat_windows[character_name].show()
+    
+    def character_selection(self):
+        if self.character_select_button:
+            self.character_select_button.setDisabled(False)
 
 class Character_screen(QMainWindow):
     def __init__(self, character: Character = Character(name= "Default", race= "Human" )):
