@@ -15,6 +15,7 @@ from Character import Character
 class MainWindow(QMainWindow):
     def __init__(self, character_sheet: dict):
         super().__init__()
+        self.setMaximumSize(500, 400)
 
         current_working_dictionary = os.path.dirname(__file__)
         self.save_folder = os.path.join(current_working_dictionary, 'characters')
@@ -50,9 +51,9 @@ class MainWindow(QMainWindow):
         self.exit_button = QPushButton("Quit")
         self.exit_button.clicked.connect(self.close)
 
-        left_hide_button = QPushButton("Hide/Show")
-        left_hide_button.setCheckable(True)
-        left_hide_button.toggled.connect(self.left_widget.setHidden)
+        self.left_hide_button = QPushButton("Hide/Show")
+        self.left_hide_button.setCheckable(True)
+        self.left_hide_button.toggled.connect(self.left_widget.setHidden)
 
         ##### Main Layout ########
         
@@ -61,7 +62,7 @@ class MainWindow(QMainWindow):
         central_layout.addWidget(self.left_widget,0,0)
         central_layout.addWidget(self.right_widget,0,2)
         central_layout.addWidget(self.exit_button,1,1)
-        central_layout.addWidget(left_hide_button,1,0)
+        central_layout.addWidget(self.left_hide_button,1,0)
         central_layout.addWidget(self.right_hide_button,1,2)
         self.setCentralWidget(central_widget)
 
@@ -170,7 +171,7 @@ class CharacterSelectScreen(QMainWindow):
         file = self._parent._parent.load()
         self._parent._parent._dict_of_loaded_characters[file.name] = file
         #print(self._parent._parent._dict_of_loaded_characters)
-        self._parent._parent.right_widget.update
+        self._parent._parent.right_widget.show_selected_characters()
         self.close()
         
     def aproval_dialog_box(self):
@@ -206,22 +207,34 @@ class RightWidget(QWidget):
     def __init__(self, parent : MainWindow): 
         super().__init__()
         self._parent = parent
-        right_layout = QVBoxLayout(self)
-        self.setLayout(right_layout)
-        self.selected_characters = list(self._parent._dict_of_loaded_characters.keys())
-        if not self._parent._dict_of_loaded_characters:
-            print("Hello")
+        self.setObjectName = "rightwidget"
+        self.right_layout = QGridLayout(self)
+        self.setLayout(self.right_layout)
 
+        self.selected_characters = list(self._parent._dict_of_loaded_characters.keys())
 
         self.right_text = QListWidget()
-        self.right_layout.addWidget(self.right_text)
-        self.right_text.setAlignment(Qt.AlignCenter )
+        self.setMaximumSize(150,300)
+        self.show_selected_characters()
+
+        self.character_select_button = QPushButton('Select Character')
+        self.character_select_button.clicked.connect(self.select_character)
+        
+        self.right_layout.addWidget(self.right_text,0,0)
+        self.right_layout.addWidget(self.character_select_button,1,0)
+        self.dict_of_stat_windows ={}
     
+    @Slot()
     def show_selected_characters(self):
-        self.selected_characters = self._parent._dict_of_loaded_characters.keys()
-        for character in self.selected_characters:
-            self
-        pass
+        self.selected_characters = list(self._parent._dict_of_loaded_characters.keys())
+        self.right_text.clear()
+        self.right_text.addItems(self.selected_characters)
+    
+    def select_character(self):
+        character_name = self.right_text.currentIndex().data()
+        current_character = self._parent._dict_of_loaded_characters[character_name]
+        self.dict_of_stat_windows[character_name] = Character_screen(current_character)
+        self.dict_of_stat_windows[character_name].show()
 
 class Character_screen(QMainWindow):
     def __init__(self, character: Character = Character(name= "Default", race= "Human" )):
