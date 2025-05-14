@@ -28,7 +28,7 @@ class MainWindow(QMainWindow):
 
 
         self._dict_of_stats = {}
-        self._dict_of_loaded_characters = {}
+        self._dict_of_loaded_characters = {"Maple":Character("Maple")}
         self.character_list_names_model = list_model(self.character_dict_with_path_names)
         self.setwindowtitle = "Character Stats"
         central_widget = QWidget()
@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
         self.left_widget = LeftWidget(self)
 
        ###### Right side of the screen 
-        self.right_widget = RightWidget()
+        self.right_widget = RightWidget(self)
 
         ### Popup Windows ###
         self.another_window = None
@@ -88,7 +88,6 @@ class MainWindow(QMainWindow):
     def save(self):
         pass
     def load(self):
-        print(self.load_character_path)
         with open(self.load_character_path, 'rb') as file:
             return pickle.load(file)
 
@@ -140,8 +139,6 @@ class CharacterSelectScreen(QMainWindow):
         self.instructions = QLabel("Please select the character of wich you want to view stats")
         self.instructions.setWordWrap(True)
 
-
-
         #buttons
         self.close_button = QPushButton("Close")
         self.close_button.pressed.connect(self.close)
@@ -149,15 +146,7 @@ class CharacterSelectScreen(QMainWindow):
 
         self.select_button = QPushButton("Select")
         self.select_button.pressed.connect(self.select_name)
-
-
-
-
-        #self.select_button.pressed.connect()
-        #self.aproval_dialog_box()
         
-
-
         #layout
         self.central_layout = QGridLayout()
         self.central_layout.addWidget(self.instructions,0,0)
@@ -170,6 +159,7 @@ class CharacterSelectScreen(QMainWindow):
         self.setCentralWidget(self.central)
     def print_result(self):
         print(self.load_character_dialog.result())
+        
     def show_name_in_label(self):
         self.selected_character_label.setText(self.view_model.currentIndex().data())
     
@@ -179,6 +169,8 @@ class CharacterSelectScreen(QMainWindow):
         self._parent._parent.load_character_path = character_datapath
         file = self._parent._parent.load()
         self._parent._parent._dict_of_loaded_characters[file.name] = file
+        #print(self._parent._parent._dict_of_loaded_characters)
+        self._parent._parent.right_widget.update
         self.close()
         
     def aproval_dialog_box(self):
@@ -196,12 +188,6 @@ class CharacterSelectScreen(QMainWindow):
         if self.load_character_dialog.isVisible():
             print(self.load_character_dialog.isVisible())
     
-
-        
-        
-
-
-
 class list_model(QAbstractListModel):
     def __init__(self, lst={}):
         super().__init__()
@@ -217,15 +203,302 @@ class list_model(QAbstractListModel):
 
 
 class RightWidget(QWidget):
-    def __init__(self): 
+    def __init__(self, parent : MainWindow): 
         super().__init__()
+        self._parent = parent
         right_layout = QVBoxLayout(self)
         self.setLayout(right_layout)
+        self.selected_characters = list(self._parent._dict_of_loaded_characters.keys())
+        if not self._parent._dict_of_loaded_characters:
+            print("Hello")
 
-        right_text = QLabel("right")
-        right_layout.addWidget(right_text)
-        right_text.setAlignment(Qt.AlignCenter )
 
+        self.right_text = QListWidget()
+        self.right_layout.addWidget(self.right_text)
+        self.right_text.setAlignment(Qt.AlignCenter )
+    
+    def show_selected_characters(self):
+        self.selected_characters = self._parent._dict_of_loaded_characters.keys()
+        for character in self.selected_characters:
+            self
+        pass
+
+class Character_screen(QMainWindow):
+    def __init__(self, character: Character = Character(name= "Default", race= "Human" )):
+        super().__init__()
+        self.central_widget = QWidget()
+        self.central_widget_layout = QStackedLayout()
+
+        self.stat_window = QFrame()
+        self.skill_window = QFrame()
+
+        self.central_widget_layout.addWidget(self.stat_window)
+        self.central_widget_layout.addWidget(self.skill_window)
+        self.character = character
+
+        self.stat_screen_button = QAction("Stats", self)
+        self.stat_screen_button.setCheckable(True)
+        self.stat_screen_button.triggered.connect(self.stat_screen)
+
+        self.skill_screen_button = QAction("Skills", self)
+        self.skill_screen_button.setCheckable(True)
+        self.skill_screen_button.triggered.connect(self.skill_screen)
+        
+        self.tool_bar = QToolBar()
+        self.addToolBar(self.tool_bar)
+        self.tool_bar.addAction(self.stat_screen_button)
+        self.tool_bar.addAction(self.skill_screen_button)
+
+        #layout logic
+        self.stat_window_layout = QGridLayout()
+        self.stat_window.setLayout(self.stat_window_layout)
+
+        self.skill_window_layout = QGridLayout()
+        self.skill_window.setLayout(self.skill_window_layout)
+
+        self.central_widget.setLayout(self.central_widget_layout)
+        self.setCentralWidget(self.central_widget)
+        self.stat_screen()
+
+
+
+
+    def stat_screen(self):
+        self.skill_screen_button.setChecked(False)
+        self.central_widget_layout.setCurrentIndex(0)
+        ## Widgets of the Screen
+        ##      Row 1
+        self.character_name = QLabel(self.character.name)
+        self.character_name.setObjectName('charactername')
+        self.character_name.setAlignment(Qt.AlignCenter)
+        ##      Row 2
+        self.health = MainStatFrame(self.character.health.name, 
+                                    str(self.character.health.level),
+                                    self
+                                    )
+        self.level = MainStatFrame(self.character.level.name, 
+                                str(self.character.level.level),
+                                self
+                                )
+        ##      Row 3
+        self.mana = MainStatFrame("Mana", 
+                                f"{self.character.current_mana.level}/{self.character.max_mana.level} {self.character.max_mana.mana_unit}", 
+                                self
+                                )
+        self.condensed_mana = MainStatFrame(self.character.condensed_mana.name,
+                                            str(self.character.condensed_mana.level,), 
+                                            self
+                                            )
+        ##      Row 4
+        self.resistance = MainStatFrame(self.character.resistance.name, 
+                                        str(self.character.resistance.level), 
+                                        self
+                                        )
+        self.strength = MainStatFrame(self.character.strength.name, 
+                                    str(self.character.strength.level), 
+                                    self
+                                    )
+        ##      Row 5
+        self.physical_resistance = MainStatFrame(self.character.physical_resistance.name, 
+                                                str(self.character.physical_resistance.level), 
+                                                self, 
+                                                mainstat=False
+                                            )
+        self.physical_strength = MainStatFrame(self.character.physical_strength.name, 
+                                            str(self.character.physical_strength.level), 
+                                            self,
+                                            mainstat=False
+                                            )
+        ##      Row 6
+        self.magic_resistance = MainStatFrame(self.character.magic_resistance.name, 
+                                            str(self.character.magic_resistance.level), 
+                                            self,
+                                            mainstat=False
+                                            )
+        self.magic_strength = MainStatFrame(self.character.magical_strength.name, 
+                                            str(self.character.magical_strength.level), 
+                                            self,
+                                            mainstat=False
+                                            )
+        ##      Row 7
+        self.spiritual_resistance = MainStatFrame(self.character.spiritual_resistance.name, 
+                                                str(self.character.spiritual_resistance.level), 
+                                                self,
+                                                mainstat=False)
+        self.endurance = MainStatFrame(self.character.endurance.name, 
+                                    str(self.character.endurance.level), 
+                                    self,)
+        ##      Row 8
+        self.regeneration = MainStatFrame(self.character.regeneration.name,
+                                        str(self.character.regeneration.level),
+                                        self,)
+        self.physical_endurance = MainStatFrame(self.character.physical_endurance.name,
+                                        str(self.character.physical_endurance.level),
+                                        self,
+                                        mainstat=False)
+        ##      Row 9
+        self.health_regeneration = MainStatFrame(self.character.health_regen.name,
+                                        str(self.character.health_regen.level),
+                                        self,
+                                        mainstat=False)
+        self.magic_endurance = MainStatFrame(self.character.magic_endurance.name,
+                                        str(self.character.magic_endurance.level),
+                                        self,
+                                        mainstat=False)
+        ##      Row 10
+        self.magic_regeneration = MainStatFrame(self.character.mana_regen.name,
+                                        str(self.character.mana_regen.level),
+                                        self,
+                                        mainstat=False)
+        self.agility = MainStatFrame(self.character.agility.name,
+                                        str(self.character.agility.level),
+                                        self,)
+        ##      Row 11
+        self.energy_potential = MainStatFrame(self.character.energy_potential.name,
+                                        str(self.character.energy_potential.level),
+                                        self,)
+                        ## energy potential is on both row 11 and 12
+        self.speed = MainStatFrame(self.character.speed.name,
+                                        str(self.character.speed.level),
+                                        self,
+                                        mainstat=False)
+        ##      Row 12
+        self.coordination = MainStatFrame(self.character.coordination.name,
+                                        str(self.character.coordination.level),
+                                        self,
+                                        mainstat=False)
+
+        ##Layout of the screen
+        self.stat_window_layout.setSpacing(0)
+        #Row 1
+        self.stat_window_layout.addWidget(self.character_name, 0, 0, 1, 6)
+        #Row 2
+        self.stat_window_layout.addWidget(self.health._name, 1, 0,)
+        self.stat_window_layout.addWidget(self.health._level, 1, 1,1,2)
+        self.stat_window_layout.addWidget(self.level._name, 1, 3,)
+        self.stat_window_layout.addWidget(self.level._level, 1, 4,1,2)
+        #Row 3
+        self.stat_window_layout.addWidget(self.mana._name, 2, 0,1,1)
+        self.stat_window_layout.addWidget(self.mana._level, 2, 1,1,2)
+        self.stat_window_layout.addWidget(self.condensed_mana._name, 2, 3,1,1)
+        self.stat_window_layout.addWidget(self.condensed_mana._level, 2, 4,1,2)
+        #Row 4
+        self.stat_window_layout.addWidget(self.resistance._name, 3, 0,1,1)
+        self.stat_window_layout.addWidget(self.resistance._level, 3, 1,1,2)
+        self.stat_window_layout.addWidget(self.strength._name, 3, 3,1,1)
+        self.stat_window_layout.addWidget(self.strength._level, 3, 4,1,2)
+        #Row 5
+        self.stat_window_layout.addWidget(self.physical_resistance._name, 4, 0,1,1)
+        self.stat_window_layout.addWidget(self.physical_resistance._level, 4, 1,1,2)
+        self.stat_window_layout.addWidget(self.physical_strength._name, 4, 3,1,1)
+        self.stat_window_layout.addWidget(self.physical_strength._level, 4, 4,1,2)
+        # Row 6
+        self.stat_window_layout.addWidget(self.magic_resistance._name, 5, 0,1,1)
+        self.stat_window_layout.addWidget(self.magic_resistance._level, 5, 1,1,2)
+        self.stat_window_layout.addWidget(self.magic_strength._name, 5, 3,1,1)
+        self.stat_window_layout.addWidget(self.magic_strength._level, 5, 4,1,2)
+        # Row 7
+        self.stat_window_layout.addWidget(self.spiritual_resistance._name, 6, 0,1,1)
+        self.stat_window_layout.addWidget(self.spiritual_resistance._level, 6, 1,1,2)
+        self.stat_window_layout.addWidget(self.endurance._name, 6, 3,1,1)
+        self.stat_window_layout.addWidget(self.endurance._level, 6, 4,1,2)
+        # Row 8
+        self.stat_window_layout.addWidget(self.regeneration._name, 7, 0,1,1)
+        self.stat_window_layout.addWidget(self.regeneration._level, 7, 1,1,2)
+        self.stat_window_layout.addWidget(self.physical_endurance._name, 7, 3,1,1)
+        self.stat_window_layout.addWidget(self.physical_endurance._level, 7, 4,1,2)
+        # Row 9
+        self.stat_window_layout.addWidget(self.health_regeneration._name, 8, 0,1,1)
+        self.stat_window_layout.addWidget(self.health_regeneration._level, 8, 1,1,2)
+        self.stat_window_layout.addWidget(self.magic_endurance._name, 8, 3,1,1)
+        self.stat_window_layout.addWidget(self.magic_endurance._level, 8, 4,1,2)
+        # Row 10
+        self.stat_window_layout.addWidget(self.magic_regeneration._name, 9, 0,1,1)
+        self.stat_window_layout.addWidget(self.magic_regeneration._level, 9, 1,1,2)
+        self.stat_window_layout.addWidget(self.agility._name, 9, 3,1,1)
+        self.stat_window_layout.addWidget(self.agility._level, 9, 4,1,2)
+        # Row 11
+        self.stat_window_layout.addWidget(self.energy_potential._name, 10, 0,2,1)
+        self.stat_window_layout.addWidget(self.energy_potential._level, 10, 1,2,2)
+        self.stat_window_layout.addWidget(self.speed._name, 10, 3,1,1)
+        self.stat_window_layout.addWidget(self.speed._level, 10, 4,1,2)
+        # Row 12
+        self.stat_window_layout.addWidget(self.coordination._name, 11, 3,1,1)
+        self.stat_window_layout.addWidget(self.coordination._level, 11, 4,1,2)
+
+        self.stylesheet = """
+                        QLabel#charactername { padding: 0px; 
+                                    margin: 0px; 
+                                    border: 2px solid black; 
+                                    background-color: #0e2841;
+                                    font: 18pt;
+                                    color: white
+                                    }
+"""
+        self.setStyleSheet(self.stylesheet)
+    def skill_screen(self):
+        self.stat_screen_button.setChecked(False)
+        self.central_widget_layout.setCurrentIndex(1)
+        self.testing = QLabel("Hello")
+        self.skill_window_layout.addWidget(self.testing,0,0)
+             
+
+class MainStatFrame(QLabel):
+    def __init__(self, stat_name, stat_level,parent, mainstat = True):
+        super().__init__()
+        self.mainstat = mainstat
+        self.statname = stat_name
+        self.statlevel = stat_level
+        self._parent = parent
+
+        self._name = QPushButton(stat_name)
+        self._name.setObjectName("Stat_Name")
+        self._name.clicked.connect(self.print_conf_name)
+        
+        self._level = QPushButton(stat_level)
+        self._level.setObjectName("Stat_Level")
+        self._level.clicked.connect(self.print_conf_level)
+        
+
+
+        if mainstat:
+                self._name.setStyleSheet( """
+                QPushButton#Stat_Name {padding: 0px; 
+                                    margin: 0px; 
+                                    border: 2px solid black; 
+                                    background-color: #1c548b;
+                                    font: 18pt;
+                                    color: black; 
+                                    }
+                                    """
+                )
+        else:
+                self._name.setStyleSheet( """
+                QPushButton#Stat_Name {padding: 0px; 
+                                    margin: 0px; 
+                                    border: 2px solid black; 
+                                    background-color: #4f78a1;
+                                    font: 18pt ;
+                                    color: black}
+                                    """
+                )
+        if self.statname == "Energy Potential":
+            self._name.setFixedHeight(72)
+            self._level.setFixedHeight(72)
+                #self._name.setAlignment(Qt.AlignRight)
+        self._level.setStyleSheet("""
+                QPushButton#Stat_Level {padding: 0px; 
+                                    margin: 0px; 
+                                    border: 2px solid black; 
+                                    background-color: #0e2841;
+                                    font: 18pt;}
+                            
+""")
+
+    def print_conf_name(self):
+         print(f"button {self.statname} Name is pressed")
+    def print_conf_level(self):
+         print(f"button {self.statname} Level: {self.statlevel} is pressed")
 
 
 def main():
