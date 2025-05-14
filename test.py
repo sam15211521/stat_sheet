@@ -25,29 +25,36 @@ class list_model(QAbstractListModel):
 
 class MainWindow(QMainWindow):
     def __init__(self):
-
-        self.character_path_name ={"Ben": "here", "Cat": "There"}
         super().__init__()
+        #boiler plate logic
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
 
+
+        self.character_path_name ={"Ben": "here", "Cat": "There"}
+        
+        #The model
         self.model = list_model(self.character_path_name)
         self.modelView = QListView()
         self.modelView.setModel(self.model)
 
+        #close button
         self.line_edit = QLineEdit()
         self.quitbutton = QPushButton("Quit")
         self.quitbutton.pressed.connect(self.close)
 
-
+        #add button
         self.set_button = QPushButton("Set")
         self.set_button.pressed.connect(self.add)
 
+        self.label = QLabel()
 
 
 
 
 
+
+        #layout logic
         self.central_layout = QGridLayout()
         self.central_widget.setLayout(self.central_layout)
         self.central_layout.addWidget(QLabel("Hello"), 0,0)
@@ -55,15 +62,12 @@ class MainWindow(QMainWindow):
         self.central_layout.addWidget(self.line_edit,2,0)
         self.central_layout.addWidget(self.set_button,3,0)
         self.central_layout.addWidget(self.quitbutton,4,0)
+        self.central_layout.addWidget(self.label, 5,0)
 
     def add(self):
-        #adds an item to the model
-        text = self.line_edit.text()
-        text = text.strip()
+        text = self.modelView.currentIndex().data()
         if text:
-            self.model._list.append((False, text))
-            self.model.layoutChanged.emit()
-            self.line_edit.setText("")
+            self.label.setText(text)
 
 
 def main():
