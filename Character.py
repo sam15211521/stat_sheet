@@ -386,8 +386,6 @@ class Character():
                 self.increase_next_level_requirement(stat=stat, level=level)
     
     def increase_next_level_requirement(self, stat: Stat | Skill, level):
-        initial_amount = stat.actual_mana_to_next_level
-        multiplied_by = self.mana_requirement_increaser
         next_actual_level_requirement = stat.actual_mana_to_next_level * (self.mana_requirement_increaser ** level)
         stat.actual_mana_to_next_level = next_actual_level_requirement
 
