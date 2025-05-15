@@ -1,6 +1,7 @@
 import os
 import random
 import pickle
+from Character import Character
 #from characters.ben import ben
 cur_path = os.path.dirname(__file__)
 file_path = 'characters/ben.dat'
@@ -11,6 +12,9 @@ def clearscreen():
 ####################
 clearscreen()
 print("\n")
+ben = Character("Ben",body_mana_multiplier=2722) #hiden stat = 15.327
+with open(abs_file_path,'wb') as file:
+    pickle.dump(ben, file)
 
 with open(abs_file_path, 'rb') as file:
     loaded_data = pickle.load(file)
