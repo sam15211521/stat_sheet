@@ -8,6 +8,8 @@ class Character():
         self._dict_of_skills = {}
         self._dict_of_major_stats = {}
         self._dict_of_stats = {}
+        self._mana_requirement_increaser = 1.008
+        self._stat_strengthening_increaser = 1.01
         self._name = name
         self._race = race
 
@@ -143,6 +145,20 @@ class Character():
     @dict_of_stats.setter
     def dict_of_major_stats(self, dict):
         self._dict_of_major_stats = dict
+    
+    @property
+    def mana_requirement_increaser(self):
+        return self._mana_requirement_increaser
+    @mana_requirement_increaser.setter
+    def mana_requirement_increaser(self, value):
+        self._mana_requirement_increaser = value
+    
+    @property
+    def stat_strength_increaser(self):
+        return self._stat_strengthening_increaser
+    @stat_strength_increaser.setter
+    def stat_strength_increaser(self, value):
+        self._stat_strengthening_increaser = value
 
 
     @property
@@ -192,6 +208,7 @@ class Character():
         return self._condensed_mana
     @condensed_mana.setter
     def condensed_mana(self, mana):
+        self.total_condensed_mana += mana
         self._condensed_mana = mana
     
     @property
@@ -233,7 +250,7 @@ class Character():
             if skill.affects_mana_capacity:
                 self.add_skill_to_mana_calc(skill)
     
-    def use_conensed_mana(self, amount):
+    def use_condensed_mana(self, amount):
         self.condensed_mana.level -= amount
 
     def add_condensed_mana(self, amount):
@@ -336,9 +353,10 @@ class Character():
             print( "Type Error: level can only increase by integer values")
             quit_flag = True
         if quit_flag:
-            return None
+            return False
         if stat.name in self.dict_of_stats and not stat.isparent:
             stat.level += level
+            return True
     
     def decrease_stat_level(self, stat=None, level=1):
         quit_flag = False
@@ -350,9 +368,33 @@ class Character():
             print("Type Error: level can only increase by integer values")
             quit_flag = True
         if quit_flag:
-            return None
+            return False
         if stat.name in self.dict_of_stats and not stat.isparent:
             stat.level -= level
+            return True
+    
+    def use_con_mana_to_increase_stat_level(self, stat: Stat | Skill, level =1):
+        if stat.mana_to_next_level > self.condensed_mana.level:
+            print(stat.mana_to_next_level, self.condensed_mana.level)
+            print(f"Inadiquate amount, requires: [{stat.mana_to_next_level-self.condensed_mana.level}] more mana")
+        else:
+            flag = self.increase_stat_level(stat, level=level)
+            if flag:
+                self.use_condensed_mana(stat.mana_to_next_level)
+                self.total_condensed_mana.level += stat.mana_to_next_level
+                stat._total_mana_used += stat.mana_to_next_level
+                self.increase_next_level_requirement(stat=stat, level=level)
+    
+    def increase_next_level_requirement(self, stat: Stat | Skill, level):
+        initial_amount = stat.actual_mana_to_next_level
+        multiplied_by = self.mana_requirement_increaser
+        next_actual_level_requirement = stat.actual_mana_to_next_level * (self.mana_requirement_increaser ** level)
+        stat.actual_mana_to_next_level = next_actual_level_requirement
+
+        
+
+        
+
 
 #basicCharacter = Character('basicCharacter')
 
