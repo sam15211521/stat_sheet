@@ -6,7 +6,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 from PySide6.QtGui import *
-from stats import Stat
+from stats import Stat, MajorStat
 from Character import Character
 
 
@@ -306,99 +306,100 @@ class Character_screen(QMainWindow):
         self.character_name.setObjectName('charactername')
         self.character_name.setAlignment(Qt.AlignCenter)
         ##      Row 2
-        self.health = MainStatFrame(self.character.health.name, 
-                                    str(self.character.health.level),
+        self.health = MainStatFrame(self.character.health, 
+                                    self.character,
                                     self
                                     )
-        self.level = MainStatFrame(self.character.level.name, 
-                                str(self.character.level.level),
+        self.level = MainStatFrame(self.character.level, 
+                                self.character,
                                 self
                                 )
         ##      Row 3
         self.mana = MainStatFrame("Mana", 
+                                self.character,
                                 f"{self.character.current_mana.level}/{self.character.max_mana.level} {self.character.max_mana.mana_unit}", 
                                 self
                                 )
-        self.condensed_mana = MainStatFrame(self.character.condensed_mana.name,
-                                            str(self.character.condensed_mana.level,), 
+        self.condensed_mana = MainStatFrame(self.character.condensed_mana,
+                                            self.character,
                                             self
                                             )
         ##      Row 4
-        self.resistance = MainStatFrame(self.character.resistance.name, 
-                                        str(self.character.resistance.level), 
+        self.resistance = MainStatFrame(self.character.resistance, 
+                                        self.character,
                                         self
                                         )
-        self.strength = MainStatFrame(self.character.strength.name, 
-                                    str(self.character.strength.level), 
+        self.strength = MainStatFrame(self.character.strength, 
+                                    self.character,
                                     self
                                     )
         ##      Row 5
-        self.physical_resistance = MainStatFrame(self.character.physical_resistance.name, 
-                                                str(self.character.physical_resistance.level), 
+        self.physical_resistance = MainStatFrame(self.character.physical_resistance, 
+                                                self.character,
                                                 self, 
                                                 mainstat=False
                                             )
-        self.physical_strength = MainStatFrame(self.character.physical_strength.name, 
-                                            str(self.character.physical_strength.level), 
+        self.physical_strength = MainStatFrame(self.character.physical_strength, 
+                                            self.character,
                                             self,
                                             mainstat=False
                                             )
         ##      Row 6
-        self.magic_resistance = MainStatFrame(self.character.magic_resistance.name, 
-                                            str(self.character.magic_resistance.level), 
+        self.magic_resistance = MainStatFrame(self.character.magic_resistance, 
+                                            self.character,
                                             self,
                                             mainstat=False
                                             )
-        self.magic_strength = MainStatFrame(self.character.magical_strength.name, 
-                                            str(self.character.magical_strength.level), 
+        self.magic_strength = MainStatFrame(self.character.magical_strength, 
+                                            self.character,
                                             self,
                                             mainstat=False
                                             )
         ##      Row 7
-        self.spiritual_resistance = MainStatFrame(self.character.spiritual_resistance.name, 
-                                                str(self.character.spiritual_resistance.level), 
+        self.spiritual_resistance = MainStatFrame(self.character.spiritual_resistance, 
+                                                self.character,
                                                 self,
                                                 mainstat=False)
-        self.endurance = MainStatFrame(self.character.endurance.name, 
-                                    str(self.character.endurance.level), 
+        self.endurance = MainStatFrame(self.character.endurance, 
+                                    self.character,
                                     self,)
         ##      Row 8
-        self.regeneration = MainStatFrame(self.character.regeneration.name,
-                                        str(self.character.regeneration.level),
+        self.regeneration = MainStatFrame(self.character.regeneration,
+                                        self.character,
                                         self,)
-        self.physical_endurance = MainStatFrame(self.character.physical_endurance.name,
-                                        str(self.character.physical_endurance.level),
+        self.physical_endurance = MainStatFrame(self.character.physical_endurance,
+                                        self.character,
                                         self,
                                         mainstat=False)
         ##      Row 9
-        self.health_regeneration = MainStatFrame(self.character.health_regen.name,
-                                        str(self.character.health_regen.level),
+        self.health_regeneration = MainStatFrame(self.character.health_regen,
+                                        self.character,
                                         self,
                                         mainstat=False)
-        self.magic_endurance = MainStatFrame(self.character.magic_endurance.name,
-                                        str(self.character.magic_endurance.level),
+        self.magic_endurance = MainStatFrame(self.character.magic_endurance,
+                                        self.character,
                                         self,
                                         mainstat=False)
         ##      Row 10
-        self.magic_regeneration = MainStatFrame(self.character.mana_regen.name,
-                                        str(self.character.mana_regen.level),
+        self.magic_regeneration = MainStatFrame(self.character.mana_regen,
+                                        self.character,
                                         self,
                                         mainstat=False)
-        self.agility = MainStatFrame(self.character.agility.name,
-                                        str(self.character.agility.level),
+        self.agility = MainStatFrame(self.character.agility,
+                                        self.character,
                                         self,)
         ##      Row 11
-        self.energy_potential = MainStatFrame(self.character.energy_potential.name,
-                                        str(self.character.energy_potential.level),
+        self.energy_potential = MainStatFrame(self.character.energy_potential,
+                                        self.character,
                                         self,)
                         ## energy potential is on both row 11 and 12
-        self.speed = MainStatFrame(self.character.speed.name,
-                                        str(self.character.speed.level),
+        self.speed = MainStatFrame(self.character.speed,
+                                        self.character,
                                         self,
                                         mainstat=False)
         ##      Row 12
-        self.coordination = MainStatFrame(self.character.coordination.name,
-                                        str(self.character.coordination.level),
+        self.coordination = MainStatFrame(self.character.coordination,
+                                        self.character,
                                         self,
                                         mainstat=False)
 
@@ -476,21 +477,39 @@ class Character_screen(QMainWindow):
         self.testing = QLabel("Hello")
         self.skill_window_layout.addWidget(self.testing,0,0)
 
+        
 class MainStatFrame(QLabel):
-    def __init__(self, stat_name, stat_level,parent, mainstat = True):
+    def __init__(self,
+                 stat:Stat | str | MajorStat, 
+                 character:Character, 
+                 parent:Character_screen, 
+                 mainstat = True):
         super().__init__()
         self.mainstat = mainstat
-        self.statname = stat_name
-        self.statlevel = stat_level
+        self.stat = stat
+        self._character = character
         self._parent = parent
+        if isinstance(self.stat, Stat) or isinstance(self.stat, MajorStat):
+            self.statname = self.stat.name
+            self.statlevel = self.stat.level
+            
+        elif isinstance(self.stat, str):
+            self.statname = self._character.max_mana.name
+            self.stat = self._character.max_mana
+            self.statlevel = parent
 
-        self._name = QPushButton(stat_name)
+        #print(self.statname)
+
+        self._name = QPushButton(self.statname)
         self._name.setObjectName("Stat_Name")
         self._name.clicked.connect(self.print_conf_name)
         
-        self._level = QPushButton(stat_level)
+        self._level = QPushButton(str(self.statlevel))
         self._level.setObjectName("Stat_Level")
         self._level.clicked.connect(self.print_conf_level)
+        if isinstance(self.stat, Stat):
+            self._level_changer =StatIncreaseWindow(self, self._character, self.stat)
+            self._level.clicked.connect(self._level_changer.show)
         
 
 
@@ -532,18 +551,23 @@ class MainStatFrame(QLabel):
          print(f"button {self.statname} Name is pressed")
     def print_conf_level(self):
          print(f"button {self.statname} Level: {self.statlevel} is pressed")
-
-
-class stat_increase_window(QMainWindow):
-    def __init__(self, character : Character):
+    
+class StatIncreaseWindow(QMainWindow):
+    def __init__(self, 
+                 parent : MainStatFrame, 
+                 character : Character, 
+                 stat : Stat):
         super().__init__()
         #boiler plate logic
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
         self.central_layout = QGridLayout()
         self.central_widget.setLayout(self.central_layout)
+
+        self._parent = parent
         
         self.character = character
+        self.stat = stat
 
         self.usable_mana = QDoubleSpinBox()
         
@@ -554,11 +578,11 @@ class stat_increase_window(QMainWindow):
         self.usable_mana.setMaximum(1000)
         self.usable_mana.valueChanged.connect(self.set_con_mana)
 
-        self.character_name =f"{self.character.name}: {self.character.magic_endurance.name} | {self.character.magic_endurance.level}"
-        self.character_name = QLabel(f"{self.character.name}: {self.character.magic_endurance.name} | {self.character.magic_endurance.level}")
-        self.text_mana_to_next_level = QLabel(f'Mana to next level: {self.character.magic_endurance.mana_to_next_level}')
-        self.text_total_mana = QLabel(f'Total Mana: {self.character.magic_endurance._total_mana_used}')
-        self.power_label = QLabel(f'Power: {self.character.magic_endurance.power}')
+        self.character_name =f"{self.character.name}: {self.stat.name} | {self.stat.level}"
+        self.character_name = QLabel(f"{self.character.name}: {self.stat.name} | {self.stat.level}")
+        self.text_mana_to_next_level = QLabel(f'Mana to next level: {self.stat.mana_to_next_level}')
+        self.text_total_mana = QLabel(f'Total Mana: {self.stat._total_mana_used}')
+        self.power_label = QLabel(f'Power: {self.stat.power}')
 
         self.increase_level_button = QPushButton("Increase Level")
         self.increase_level_button.clicked.connect(self.increase_level)
@@ -576,13 +600,15 @@ class stat_increase_window(QMainWindow):
     
     def increase_level(self):
         #current_requirment = self.character.mana_to_next_level
-        if self.character.condensed_mana.level >= self.character.magic_endurance.mana_to_next_level:
-            self.character.use_con_mana_to_increase_stat_level(self.character.magic_endurance)
+        if self.character.condensed_mana.level >= self.stat.mana_to_next_level:
+            #print(self.stat.actual_mana_to_next_level)
+            self.character.use_con_mana_to_increase_stat_level(self.stat)
             self.usable_mana.setValue(self.character.condensed_mana.level)
-            self.character_name.setText(f"{self.character.name}: {self.character.magic_endurance.name} | {self.character.magic_endurance.level}")
-            self.text_total_mana.setText(f'Total Mana: {self.character.magic_endurance._total_mana_used}')
-            self.text_mana_to_next_level.setText(f'Mana to next level: {self.character.magic_endurance.mana_to_next_level}')
-            self.power_label.setText(f'Power: {self.character.magic_endurance.power}')
+            self.character_name.setText(f"{self.character.name}: {self.stat.name} | {self.stat.level}")
+            self.text_total_mana.setText(f'Total Mana: {self.stat._total_mana_used}')
+            self.text_mana_to_next_level.setText(f'Mana to next level: {self.stat.mana_to_next_level}')
+            self.power_label.setText(f'Power: {self.stat.power}')
+
 
 
 def main():
