@@ -546,6 +546,9 @@ class MainStatFrame(QLabel):
                                     font: 18pt;}
                             
 """)
+    def update_frames(self):
+        self._name.setText(self.stat.name)
+        self._level.setText(str(self.stat.level))
 
     def print_conf_name(self):
          print(f"button {self.statname} Name is pressed")
@@ -556,7 +559,8 @@ class StatIncreaseWindow(QMainWindow):
     def __init__(self, 
                  parent : MainStatFrame, 
                  character : Character, 
-                 stat : Stat):
+                 stat : Stat,):
+                 
         super().__init__()
         #boiler plate logic
         self.central_widget = QWidget(self)
@@ -564,18 +568,20 @@ class StatIncreaseWindow(QMainWindow):
         self.central_layout = QGridLayout()
         self.central_widget.setLayout(self.central_layout)
 
+
         self._parent = parent
         
         self.character = character
         self.stat = stat
 
-        self.usable_mana = QDoubleSpinBox()
+        self.usable_mana = QSpinBox()
+        self.usable_mana.setValue(self.character.condensed_mana.level)
         
         self.usable_mana.setValue(self.character.condensed_mana.level)
-        #self.usable_mana.lineEdit().setReadOnly(True)
+        self.usable_mana.lineEdit().setReadOnly(True)
+        self.usable_mana.setButtonSymbols(QAbstractSpinBox.ButtonSymbols.NoButtons)
         self.usable_mana.setSingleStep(1)
-        self.usable_mana.setDecimals(0)
-        self.usable_mana.setMaximum(1000)
+        self.usable_mana.setMaximum(100000)
         self.usable_mana.valueChanged.connect(self.set_con_mana)
 
         self.character_name =f"{self.character.name}: {self.stat.name} | {self.stat.level}"
@@ -586,6 +592,9 @@ class StatIncreaseWindow(QMainWindow):
 
         self.increase_level_button = QPushButton("Increase Level")
         self.increase_level_button.clicked.connect(self.increase_level)
+        self.mana_increase_button = QPushButton("Increase Con-Mana")
+        self.mana_increase_button.clicked.connect(self.increase_conmana)
+        self.mana_increase_button.pressed.connect(self.increase_conmana)
 
         self.central_layout.addWidget(self.character_name,0,0)
         self.central_layout.addWidget(self.usable_mana,1,0)
@@ -593,21 +602,33 @@ class StatIncreaseWindow(QMainWindow):
         self.central_layout.addWidget(self.text_total_mana,3,0)
         self.central_layout.addWidget(self.power_label, 4, 0)
         self.central_layout.addWidget(self.increase_level_button,5,0)
+        self.central_layout.addWidget(self.mana_increase_button,6,0)
+
+    def show(self):
+        self.update_screens()
+        return super().show()
+    
+    def update_screens(self):
+        self.usable_mana.setValue(self.character.condensed_mana.level)
+        self.character_name.setText(f"{self.character.name}: {self.stat.name} | {self.stat.level}")
+        self.text_total_mana.setText(f'Total Mana: {self.stat._total_mana_used}')
+        self.text_mana_to_next_level.setText(f'Mana to next level: {self.stat.mana_to_next_level}')
+        self.power_label.setText(f'Power: {self.stat.power}')
 
     def set_con_mana(self):
         self.character.condensed_mana.level = int(self.usable_mana.value())
+    
+    def increase_conmana(self):
+        self.character.add_condensed_mana(10)
+        self.usable_mana.setValue(self.character.condensed_mana.level)
+        self._parent._parent.condensed_mana.update_frames()
 
     
     def increase_level(self):
-        #current_requirment = self.character.mana_to_next_level
         if self.character.condensed_mana.level >= self.stat.mana_to_next_level:
-            #print(self.stat.actual_mana_to_next_level)
             self.character.use_con_mana_to_increase_stat_level(self.stat)
-            self.usable_mana.setValue(self.character.condensed_mana.level)
-            self.character_name.setText(f"{self.character.name}: {self.stat.name} | {self.stat.level}")
-            self.text_total_mana.setText(f'Total Mana: {self.stat._total_mana_used}')
-            self.text_mana_to_next_level.setText(f'Mana to next level: {self.stat.mana_to_next_level}')
-            self.power_label.setText(f'Power: {self.stat.power}')
+            self.update_screens()
+            self._parent.update_frames()
 
 
 
