@@ -1,5 +1,5 @@
 from statistics import mean
-from math import floor
+from math import floor, ceil
 from mastery import basic, beginner, intermediate, expert, master
 
 # all classes need a: name, mana_to_next_level, total_mana_invested, power, discription
@@ -15,6 +15,7 @@ class Attribute():
         self._level = level
         
         self._mana_to_next_level = 1
+        self._actual_mana_to_next_level =1
         self._total_mana_used = 0
         
         self._discription = discription
@@ -25,12 +26,14 @@ class Attribute():
 
         self._attribute_dictionary[self._name] = self
         self._affects_mana_capacity = mana_capacity_flag
+        
     
     def __str__(self):
         line1 = f"{self.name} | Level: {self.level:,} "
         line2 = f"mana to next level: {self.mana}"
         line3 = self.discription
         return "\n".join([line1, line2, line3])
+    
     
     #getter and setter functions of _name
     @property
@@ -59,8 +62,16 @@ class Attribute():
     
     @mana_to_next_level.setter
     def mana_to_next_level(self, mana):
-        self.mana_to_next_level = mana
+        self._mana_to_next_level = mana
     
+    @property
+    def actual_mana_to_next_level(self):
+        return self._actual_mana_to_next_level
+    @actual_mana_to_next_level.setter
+    def actual_mana_to_next_level(self, value):
+        self._mana_to_next_level = ceil(value)
+        self._actual_mana_to_next_level = value 
+
     #getter and setter functions of _total_mana_used
     @property
     def mana(self):
@@ -78,7 +89,7 @@ class Attribute():
     
     @power.setter
     def power(self, power):
-        self._power = 1.01 ** self.level
+        self._power = power
     
     #getter and setter of the discription
     @property
