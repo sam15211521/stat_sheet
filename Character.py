@@ -265,15 +265,15 @@ class Character():
     
     ###########################################################
     #calculating character level
-    def calculating_skill_level(self):
-        self.skills_level.calculate_level()
-        self.calculate_character_level()
     def calculate_character_level(self):
+        print('\n got into the character_level\n')
+        self.skills_level.calculate_level()
         #takes the average of all the levels to determine the character level
         temp_level = self.level.level
         sum_of_levels = 0
         num_of_levels = len(self._dict_of_stats_affecting_level)
         for stat in self._dict_of_stats_affecting_level.values():
+            #print(stat.name, stat.level)
             sum_of_levels += stat.level
         temp_level = math.floor(sum_of_levels / num_of_levels)
 
@@ -397,6 +397,7 @@ class Character():
         if quit_flag:
             return False
         if stat.name in self.dict_of_stats and not stat.isparent:
+            print("IN HERE")
             stat.level += level
             return True
         elif stat.name in self.skills_level.dict_of_skills:
@@ -428,12 +429,14 @@ class Character():
         else:
             flag = self.increase_stat_level(stat, level=level)
             if flag:
+                print('got passed the flag', level)
                 for _ in range(level):
                     self.use_condensed_mana(stat.mana_to_next_level)
                     self.total_condensed_mana.level += stat.mana_to_next_level
                     stat._total_mana_used += stat.mana_to_next_level
                     self.increase_next_level_requirement(stat=stat, level=level)
-                    self.calculate_character_level()
+            print('got out of the flag')
+            self.calculate_character_level()
     
     def increase_next_level_requirement(self, stat: Stat | Skill, level):
         next_actual_level_requirement = stat.actual_mana_to_next_level * (self.mana_requirement_increaser ** level)
