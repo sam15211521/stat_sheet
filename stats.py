@@ -52,7 +52,7 @@ class Attribute():
     @level.setter
     def level(self, level):
         self._level = level
-        self.power = 1 *(1.01 ** self.level)
+        #self.power = 1 *(1.01 ** self.level)
         self.calculate_capacity_multiplier()
    
     #getter and setter functions of _mana_to_next_level
@@ -160,6 +160,14 @@ class HiddenManaStat(Attribute):
 class CondensedMana(MajorStat):
     def __init__(self, name='', discription='', mana_multiplier=1,mana_capacity_flag=False):
         super().__init__(name, discription, mana_multiplier, mana_capacity_flag)
+        self._power = 1
+
+    @property
+    def power(self):
+        return self._power
+    @power.setter
+    def power(self, value):
+        self._power = value
     
     def __str__(self):
         return_string = f"Con Mana: {self.level:,}"
