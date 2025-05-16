@@ -386,13 +386,12 @@ class SkillStat(Attribute):
         if isinstance(flag, bool):
             self._affects_character_level = flag
 
-    # v1, may have to change it up if it start
-    # making things laggy
+   
+   
     # takes the amount of mana used on the skills in dict_of_skills and sets the 
     # level of the SkillStat based on it.
     def calculate_level(self):
-        current_level = self.level              
-        mana_used_to_get_to_current_level = self.total_mana_used
+        print(f'calculating {self.name} at {self.level}')
         amount_of_mana = 0
         for skill in self.dict_of_skills.values():
             amount_of_mana += skill.total_mana_used
@@ -403,6 +402,7 @@ class SkillStat(Attribute):
 
         while actual_current_level_cost <= amount_of_mana:
             self.level += 1
+            print(self.name, self.level)
             amount_of_mana -= ceil(actual_current_level_cost)
             actual_current_level_cost = actual_current_level_cost * (1.008 ** self.level)
         self.actual_mana_to_next_level = actual_current_level_cost
