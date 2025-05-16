@@ -193,6 +193,7 @@ class Stat(Attribute):
         self._parent_stat = None
         self._power = 1
         self._affects_character_level = affects_character_level
+
     
     @property
     def affects_character_level(self):
@@ -357,9 +358,11 @@ class SkillStat(Attribute):
                  discription='', 
                  mana_multiplier=1, 
                  mana_capacity_flag=False, 
-                 level=0):
+                 level=0,
+                 affects_character_level=False):
         super().__init__(name, discription, mana_multiplier, mana_capacity_flag, level)
         self._dict_of_skills = {} 
+        self._affects_character_level = affects_character_level
     
     @property
     def dict_of_skills(self):
@@ -374,6 +377,14 @@ class SkillStat(Attribute):
     @abc.setter
     def abc(self, value):
         self._abc = value
+    
+    @property
+    def affects_character_level(self):
+        return self._affects_character_level
+    @affects_character_level.setter
+    def affects_character_level(self, flag):
+        if isinstance(flag, bool):
+            self._affects_character_level = flag
 
     # v1, may have to change it up if it start
     # making things laggy
