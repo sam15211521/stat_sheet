@@ -14,6 +14,8 @@ class Character():
         self._name = name
         self._race = race
 
+        self._stats_and_skills_effecting_mana = {}
+
         # the major stats
         self._health = MajorStat("Health")
         self._max_health = MajorStat("Max Health")
@@ -27,12 +29,13 @@ class Character():
                                            mana_capacity_flag=True,)
         self.hidden_mana_stat.level = body_mana_multiplier
         
-        self._stat_and_skills_effecting_mana = {}
 
         #regular stats
         
         #Strength
-        self.strength = Stat(name = "Strength", isparent=True)
+        self.strength = Stat(name = "Strength", 
+                             isparent=True, 
+                             affects_character_level=True)
         self.physical_strength = Stat(name = "Physical Strength")
         self.magical_strength = Stat(name = "Mana Strength",
                                      mana_capacity_flag=True,
@@ -41,7 +44,9 @@ class Character():
                                      self.magical_strength)
 
         #Resistance
-        self.resistance = Stat(name="Resistance", isparent=True)
+        self.resistance = Stat(name="Resistance", 
+                               isparent=True,
+                               affects_character_level=True)
         self.physical_resistance = Stat(name="Physical Resistance")
         self.magic_resistance = Stat(name="Mana Resistance",
                                      mana_capacity_flag=True)
@@ -51,7 +56,9 @@ class Character():
                                        self.spiritual_resistance)
         
         #Regeneration
-        self.regeneration = Stat(name="Regeneration", isparent=True)
+        self.regeneration = Stat(name="Regeneration", 
+                                 isparent=True,
+                                 affects_character_level=True)
         self.health_regen = Stat(name="Health Regeneration")
         self.mana_regen= Stat(name="Mana Regeneration",
                               mana_capacity_flag=True)
@@ -59,7 +66,9 @@ class Character():
                                          self.mana_regen)
         
         #Endurance
-        self.endurance = Stat(name="Endurance", isparent=True)
+        self.endurance = Stat(name="Endurance", 
+                              isparent=True,
+                              affects_character_level=True)
         self.physical_endurance = Stat(name="Physical Endurance")
         self.magic_endurance = Stat(name="Magic_Endurance",
                                     mana_capacity_flag=True)
@@ -67,7 +76,9 @@ class Character():
                                       self.magic_endurance)
         
         #Agility
-        self.agility = Stat(name="Agility", isparent=True)
+        self.agility = Stat(name="Agility", 
+                            isparent=True,
+                            affects_character_level=True)
         self.speed = Stat(name="Speed")
         self.coordination = Stat(name="Coordination")
         self.agility.add_child_stat(self.speed, 
@@ -76,10 +87,12 @@ class Character():
         #Energy potential
         self.energy_potential = Stat(name= "Energy Potential", 
                                      mana_capacity_flag=True,
-                                     mana_multiplier=1.5)
+                                     mana_multiplier=1.5,
+                                     affects_character_level=True)
         
         # Stat affected by all skills
-        self.skills_level = SkillStat(name = "Skills Level")
+        self.skills_level = SkillStat(name = "Skills Level",
+                                      affects_character_level=True)
 
         self.add_stat_to_mana_calc(
                                    self.magic_endurance,
@@ -229,11 +242,11 @@ class Character():
         self._hidden_mana_stat = mana
 
     @property
-    def stat_and_skills_effecting_mana(self):
-        return self._stat_and_skills_effecting_mana
-    @stat_and_skills_effecting_mana.setter
-    def stat_and_skills_effecting_mana(self, stat):
-        self._stat_and_skills_effecting_mana = stat
+    def stats_and_skills_effecting_mana(self):
+        return self._stats_and_skills_effecting_mana
+    @stats_and_skills_effecting_mana.setter
+    def stats_and_skills_effecting_mana(self, stat):
+        self._stats_and_skills_effecting_mana = stat
     
     @property
     def dict_of_skills(self):
@@ -251,6 +264,20 @@ class Character():
         self._template = mana
     
     ###########################################################
+    #calculating character level
+    def calculating_skill_level(self):
+        self.skills_level.calculate_level()
+        self.calculate_character_level()
+    def calculate_character_level(self):
+        #takes the average of all the levels to determine the character level
+        temp_level = self.level.level
+        sum_of_levels = 0
+        num_of_levels = len(self._dict_of_stats_affecting_level)
+        for stat in self._dict_of_stats_affecting_level.values():
+            sum_of_levels += stat.level
+        temp_level = math.floor(sum_of_levels / num_of_levels)
+
+        self.level.level = temp_level
     #other misc methods
     
     def add_skill(self, skill):
@@ -258,6 +285,7 @@ class Character():
             self._dict_of_skills[skill.name] = skill
             self.skills_level.dict_of_skills[skill.name] = skill
             self.skills_level.calculate_level()
+            self.calculate_character_level()
             if skill.affects_mana_capacity:
                 self.add_skill_to_mana_calc(skill)
     
@@ -278,13 +306,13 @@ class Character():
     def add_skill_to_mana_calc(self, *args):
         for skill in args:
             if isinstance(skill, Skill):
-                self.stat_and_skills_effecting_mana[skill.name] = skill
+                self.stats_and_skills_effecting_mana[skill.name] = skill
                 self.calculate_max_mana()
 
     def add_stat_to_mana_calc(self, *args):
         for stat in args:
             if isinstance(stat, Stat):
-                self.stat_and_skills_effecting_mana[stat.name] = stat
+                self.stats_and_skills_effecting_mana[stat.name] = stat
                 self.calculate_max_mana()
         
         
@@ -303,7 +331,7 @@ class Character():
         # average person's hidden stat needs to multiply to this: 54433106
         stat_skill_multipliers = []
         
-        for stat_skill in self.stat_and_skills_effecting_mana.values():
+        for stat_skill in self.stats_and_skills_effecting_mana.values():
             stat_skill_multipliers.append(stat_skill.mana_capasity_multiplier)
         mana_multiplier = math.prod(stat_skill_multipliers)
         mana_capacity = (self.hidden_mana_stat.level * (mana_multiplier** self.energy_potential.mana_capasity_multiplier))
@@ -344,14 +372,17 @@ class Character():
 
                 for stat in temp:
                     self._dict_of_major_stats[stat.name] = stat
-            print(self._dict_of_major_stats)
         else:
             if not bool(self.dict_of_stats):
 
                 temp = [stat for stat in list(self.__dict__.values()) 
-                        if isinstance(stat, Stat) | isinstance(stat, CondensedMana)]
+                        if isinstance(stat, Stat) | isinstance(stat, CondensedMana) | isinstance(stat, SkillStat)]
 
                 for stat in temp:
+                    if stat.name == "Condensed Mana":
+                        continue
+                    elif stat.affects_character_level:
+                        self._dict_of_stats_affecting_level[stat.name] = stat
                     self.dict_of_stats[stat.name] = stat
 
     def increase_stat_level(self, stat=None, level=1):
@@ -388,6 +419,7 @@ class Character():
             return True
         elif stat.name in self.skills_level.dict_of_skills:
             stat.level -= level
+        self.calculate_character_level()
     
     def use_con_mana_to_increase_stat_level(self, stat: Stat | Skill, level =1):
         if stat.mana_to_next_level > self.condensed_mana.level:
@@ -401,6 +433,7 @@ class Character():
                     self.total_condensed_mana.level += stat.mana_to_next_level
                     stat._total_mana_used += stat.mana_to_next_level
                     self.increase_next_level_requirement(stat=stat, level=level)
+                    self.calculate_character_level()
     
     def increase_next_level_requirement(self, stat: Stat | Skill, level):
         next_actual_level_requirement = stat.actual_mana_to_next_level * (self.mana_requirement_increaser ** level)
