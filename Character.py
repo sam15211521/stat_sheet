@@ -1,4 +1,4 @@
-from stats import MajorStat, Stat ,Skill, CondensedMana, HiddenManaStat
+from stats import MajorStat, Stat ,Skill, SkillStat, CondensedMana, HiddenManaStat
 import math
 
 class Character():
@@ -8,6 +8,7 @@ class Character():
         self._dict_of_skills = {}
         self._dict_of_major_stats = {}
         self._dict_of_stats = {}
+        self._dict_of_stats_affecting_level = {}
         self._mana_requirement_increaser = 1.008
         self._stat_strengthening_increaser = 1.01
         self._name = name
@@ -76,6 +77,9 @@ class Character():
         self.energy_potential = Stat(name= "Energy Potential", 
                                      mana_capacity_flag=True,
                                      mana_multiplier=1.5)
+        
+        # Stat affected by all skills
+        self.skills_level = SkillStat(name = "Skills Level")
 
         self.add_stat_to_mana_calc(
                                    self.magic_endurance,
@@ -234,6 +238,11 @@ class Character():
     @property
     def dict_of_skills(self):
         return self._dict_of_skills
+    @dict_of_skills.setter
+    def dict_of_skills(self, value):
+        self._dict_of_skills = value
+        self.skills_level.dict_of_skills = value
+
     @property
     def template(self):
         return self._template
@@ -247,6 +256,8 @@ class Character():
     def add_skill(self, skill):
         if isinstance(skill, Skill):
             self._dict_of_skills[skill.name] = skill
+            self.skills_level.dict_of_skills[skill.name] = skill
+            self.skills_level.calculate_level()
             if skill.affects_mana_capacity:
                 self.add_skill_to_mana_calc(skill)
     
@@ -357,6 +368,9 @@ class Character():
         if stat.name in self.dict_of_stats and not stat.isparent:
             stat.level += level
             return True
+        elif stat.name in self.skills_level.dict_of_skills:
+            stat.level += level
+            return True
     
     def decrease_stat_level(self, stat=None, level=1):
         quit_flag = False
@@ -372,6 +386,8 @@ class Character():
         if stat.name in self.dict_of_stats and not stat.isparent:
             stat.level -= level
             return True
+        elif stat.name in self.skills_level.dict_of_skills:
+            stat.level -= level
     
     def use_con_mana_to_increase_stat_level(self, stat: Stat | Skill, level =1):
         if stat.mana_to_next_level > self.condensed_mana.level:
@@ -380,10 +396,11 @@ class Character():
         else:
             flag = self.increase_stat_level(stat, level=level)
             if flag:
-                self.use_condensed_mana(stat.mana_to_next_level)
-                self.total_condensed_mana.level += stat.mana_to_next_level
-                stat._total_mana_used += stat.mana_to_next_level
-                self.increase_next_level_requirement(stat=stat, level=level)
+                for _ in range(level):
+                    self.use_condensed_mana(stat.mana_to_next_level)
+                    self.total_condensed_mana.level += stat.mana_to_next_level
+                    stat._total_mana_used += stat.mana_to_next_level
+                    self.increase_next_level_requirement(stat=stat, level=level)
     
     def increase_next_level_requirement(self, stat: Stat | Skill, level):
         next_actual_level_requirement = stat.actual_mana_to_next_level * (self.mana_requirement_increaser ** level)
