@@ -30,7 +30,7 @@ class Attribute():
     
     def __str__(self):
         line1 = f"{self.name} | Level: {self.level:,} "
-        line2 = f"mana to next level: {self.mana}"
+        line2 = f"mana to next level: {self.total_mana_used}"
         line3 = self.discription
         return "\n".join([line1, line2, line3])
     
@@ -69,16 +69,16 @@ class Attribute():
         return self._actual_mana_to_next_level
     @actual_mana_to_next_level.setter
     def actual_mana_to_next_level(self, value):
-        self._mana_to_next_level = ceil(value)
+        self.mana_to_next_level = ceil(value)
         self._actual_mana_to_next_level = value 
 
     #getter and setter functions of _total_mana_used
     @property
-    def mana(self):
+    def total_mana_used(self):
         return self._total_mana_used
    
-    @mana.setter
-    def mana(self, mana):
+    @total_mana_used.setter
+    def total_mana_used(self, mana):
         self._total_mana_used = mana
     
     #getter and setter funcitons of _power
@@ -181,7 +181,8 @@ class Stat(Attribute):
                  childstats = {},
                  mana_multiplier=1, 
                  mana_capacity_flag=False,
-                 level = 0
+                 level = 0,
+                 affects_character_level = False
                  ):
         super().__init__(name, discription, mana_multiplier, mana_capacity_flag, level)
         
@@ -191,6 +192,14 @@ class Stat(Attribute):
         self._child_stats = {}
         self._parent_stat = None
         self._power = 1
+        self._affects_character_level = affects_character_level
+    
+    @property
+    def affects_character_level(self):
+        return self._affects_character_level
+    @affects_character_level.setter
+    def affects_character_level(self, bloo):
+        self._affects_character_level = [bloo]
     
     @property
     def isparent(self):
@@ -276,8 +285,8 @@ class Stat(Attribute):
         pass
 
 class Skill(Attribute):
-    def __init__(self, name='', discription='', mana_multiplier=1, mana_capacity_flag=False):
-        super().__init__(name, discription, mana_multiplier, mana_capacity_flag)
+    def __init__(self, name='', discription='', mana_multiplier=1, mana_capacity_flag=False, level=0):
+        super().__init__(name, discription, mana_multiplier, mana_capacity_flag, level)
         self._basics = False
         self._mastery = basic
         self._tagged_stats = {}
@@ -341,3 +350,58 @@ class Skill(Attribute):
         #mastery multiplier will 
         if self.affects_mana_capacity:
             self.mana_capasity_multiplier = round(self.mana_capasity_multiplier * 1.01 ** (self.level* self.mastery.multiplier),2)
+
+
+class SkillStat(Attribute):
+    def __init__(self, name='', 
+                 discription='', 
+                 mana_multiplier=1, 
+                 mana_capacity_flag=False, 
+                 level=0):
+        super().__init__(name, discription, mana_multiplier, mana_capacity_flag, level)
+        self._dict_of_skills = {} 
+    
+    @property
+    def dict_of_skills(self):
+        return self._dict_of_skills
+    @dict_of_skills.setter
+    def dict_of_skills(self, value):
+        self._dict_of_skills = value
+    
+    @property
+    def abc(self):
+        return self._abc
+    @abc.setter
+    def abc(self, value):
+        self._abc = value
+
+    # v1, may have to change it up if it start
+    # making things laggy
+    # takes the amount of mana used on the skills in dict_of_skills and sets the 
+    # level of the SkillStat based on it.
+    def calculate_level(self):
+        current_level = self.level              
+        mana_used_to_get_to_current_level = self.total_mana_used
+        amount_of_mana = 0
+        for skill in self.dict_of_skills.values():
+            amount_of_mana += skill.total_mana_used
+        self.total_mana_used = amount_of_mana
+
+        actual_current_level_cost = self.actual_mana_to_next_level
+        shown_current_level_cost = ceil(actual_current_level_cost)
+
+        while actual_current_level_cost <= amount_of_mana:
+            self.level += 1
+            amount_of_mana -= ceil(actual_current_level_cost)
+            actual_current_level_cost = actual_current_level_cost * (1.008 ** self.level)
+        self.actual_mana_to_next_level = actual_current_level_cost
+        self.mana_to_next_level = shown_current_level_cost
+        
+        
+
+        
+        
+        
+    def increase_next_level_requirement(self, stat: Stat | Skill, level):
+        next_actual_level_requirement = stat.actual_mana_to_next_level * (1.008 ** level)
+        stat.actual_mana_to_next_level = next_actual_level_requirement
