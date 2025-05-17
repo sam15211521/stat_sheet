@@ -267,7 +267,7 @@ class Character():
     #calculating character level
     def calculate_character_level(self):
         #print('\n got into the character_level\n')
-        self.skills_level.calculate_level()
+        #self.skills_level.calculate_level()
         #takes the average of all the levels to determine the character level
         temp_level = self.level.level
         sum_of_levels = 0
@@ -403,29 +403,51 @@ class Character():
             return False
         else:
             if stat.name in self.dict_of_stats and not stat.isparent:
-                print(f'{stat.name} in self.dict_of_stats and is not a parent')
+                #print(f'{stat.name} in self.dict_of_stats and is not a parent')
                 self.increase_stat_level(stat=stat, level=level)
             elif stat.name in self.skills_level.dict_of_skills:
-                print(f'{stat.name} in self.skills_level.dict_of_stats')
-                self.increase_skill_level()
+                self.increase_skill_level(stat, level = level)
     
     def check_if_con_mana_more_than_stat(self,skill_stat: Skill | Stat):
         returnstat =  self.condensed_mana.level > skill_stat.mana_to_next_level
         return returnstat
     
     def increase_skill_level(self, skill=  Skill, level=1):
-        print("in INcrease_Skill_Level")
-        pass
-    def increase_stat_level(self, stat=  Stat, level=1):
-        print('in increase_stat_level')
+        #print("in INcrease_Skill_Level")
         for _ in range(level):
-            print(f'\nstat level: {stat.level}\n total_mana: {self.condensed_mana.level}\n mana_requirement: {stat.mana_to_next_level}\n actual_mana_requirement: {stat.actual_mana_to_next_level}')
+            #print(f'\n{skill.name} {id(skill)} Level: {skill.level}\n total_mana: {self.condensed_mana.level}\n mana_requirement: {skill.mana_to_next_level}\n actual_mana_requirement: {skill.actual_mana_to_next_level}')
+            if self.check_if_con_mana_more_than_stat(skill_stat=skill):
+                self.use_condensed_mana(skill.mana_to_next_level)
+                skill.total_mana_used += skill.mana_to_next_level
+                self.increase_next_level_requirement(stat=skill, level=1)
+                skill.level +=1
+        #print(f'\n{skill.name} {id(skill)} Level: {skill.level}\n total_mana: {self.condensed_mana.level}\n mana_requirement: {skill.mana_to_next_level}\n actual_mana_requirement: {skill.actual_mana_to_next_level}')
+        #print(skill)
+        self.skills_level.calculate_level()    
+        self.calculate_character_level()
+
+    def increase_stat_level(self, stat=  Stat, level=1):
+        for _ in range(level):
+            #print(f'\n{stat.name} Level: {stat.level}\n total_mana: {self.condensed_mana.level}\n mana_requirement: {stat.mana_to_next_level}\n actual_mana_requirement: {stat.actual_mana_to_next_level}')
             if self.check_if_con_mana_more_than_stat(skill_stat=stat,):
                 self.use_condensed_mana(stat.mana_to_next_level)
                 self.increase_next_level_requirement(stat=stat, level = 1)
                 stat.level += 1
-        pass
+        #print(f'\n{stat.name} Level: {stat.level}\n total_mana: {self.condensed_mana.level}\n mana_requirement: {stat.mana_to_next_level}\n actual_mana_requirement: {stat.actual_mana_to_next_level}')
+        self.calculate_character_level()
 
+    def increase_next_level_requirement(self, stat: Stat | Skill, level=1):
+        next_actual_level_requirement = stat.actual_mana_to_next_level * (self.mana_requirement_increaser ** level)
+        stat.actual_mana_to_next_level = next_actual_level_requirement
+
+
+
+
+
+
+
+
+        #Old version do not use
     def old_increase_stat_level(self, stat=None, level=1):
         quit_flag = False
         if not isinstance(stat, Stat) and not isinstance(stat, Skill):
@@ -484,10 +506,7 @@ class Character():
 
             print('got out of the flag')
             self.calculate_character_level()
-    
-    def increase_next_level_requirement(self, stat: Stat | Skill, level=1):
-        next_actual_level_requirement = stat.actual_mana_to_next_level * (self.mana_requirement_increaser ** level)
-        stat.actual_mana_to_next_level = next_actual_level_requirement
+   ###### 
 
         
 
