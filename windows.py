@@ -596,6 +596,9 @@ class StatIncreaseWindow(QMainWindow):
         self.mana_increase_button.clicked.connect(self.increase_conmana)
         self.mana_increase_button.pressed.connect(self.increase_conmana)
 
+        self.print_stats_button = QPushButton("Print Stats")
+        self.print_stats_button.clicked.connect(self.print_stats)
+
         self.central_layout.addWidget(self.character_name,0,0)
         self.central_layout.addWidget(self.usable_mana,1,0)
         self.central_layout.addWidget(self.text_mana_to_next_level,2,0)
@@ -603,6 +606,10 @@ class StatIncreaseWindow(QMainWindow):
         self.central_layout.addWidget(self.power_label, 4, 0)
         self.central_layout.addWidget(self.increase_level_button,5,0)
         self.central_layout.addWidget(self.mana_increase_button,6,0)
+        self.central_layout.addWidget(self.print_stats_button,7,0)
+    
+    def print_stats(self):
+        print(self.character)
 
     def show(self):
         self.update_screens()
@@ -626,9 +633,11 @@ class StatIncreaseWindow(QMainWindow):
     
     def increase_level(self):
         if self.character.condensed_mana.level >= self.stat.mana_to_next_level:
-            self.character.use_con_mana_to_increase_stat_level(self.stat)
+            self.character.increase_stat_or_skill_level(self.stat)
             self.update_screens()
             self._parent.update_frames()
+            self._parent._parent.condensed_mana.update_frames()
+            self._parent._parent.level.update_frames()
 
 
 
@@ -648,4 +657,5 @@ class Character_Stat_Screen(QFrame):
         super().__init__()
 
 if __name__ == "__main__":
+    os.system("cls")
     main()
