@@ -266,7 +266,7 @@ class Character():
     ###########################################################
     #calculating character level
     def calculate_character_level(self):
-        print('\n got into the character_level\n')
+        #print('\n got into the character_level\n')
         self.skills_level.calculate_level()
         #takes the average of all the levels to determine the character level
         temp_level = self.level.level
@@ -276,6 +276,7 @@ class Character():
             #print(stat.name, stat.level)
             sum_of_levels += stat.level
         temp_level = math.floor(sum_of_levels / num_of_levels)
+        #print('temp level:', temp_level)
 
         self.level.level = temp_level
     #other misc methods
@@ -284,7 +285,6 @@ class Character():
         if isinstance(skill, Skill):
             self._dict_of_skills[skill.name] = skill
             self.skills_level.dict_of_skills[skill.name] = skill
-            self.skills_level.calculate_level()
             self.calculate_character_level()
             if skill.affects_mana_capacity:
                 self.add_skill_to_mana_calc(skill)
@@ -385,7 +385,48 @@ class Character():
                         self._dict_of_stats_affecting_level[stat.name] = stat
                     self.dict_of_stats[stat.name] = stat
 
-    def increase_stat_level(self, stat=None, level=1):
+
+
+
+### Need to edit the way that a stat level is increased and decreased as it is confusing and prone to mistakes due to calculating the level first
+    #this function checks if the stat is a Stat or Skill then calls a function to increas the stat level
+    def increase_stat_or_skill_level(self, stat, level=1):
+        quit_flag = False
+        if not isinstance(stat, Stat) and not isinstance(stat, Skill):
+            print( "Type Error: selected stat is not a type <Stat> or <Skill>.")
+            print(f"is type {type(stat)}")
+            quit_flag = True
+        if not isinstance(level, int):
+            print( "Type Error: level can only increase by integer values")
+            quit_flag = True
+        if quit_flag:
+            return False
+        else:
+            if stat.name in self.dict_of_stats and not stat.isparent:
+                print(f'{stat.name} in self.dict_of_stats and is not a parent')
+                self.increase_stat_level(stat=stat, level=level)
+            elif stat.name in self.skills_level.dict_of_skills:
+                print(f'{stat.name} in self.skills_level.dict_of_stats')
+                self.increase_skill_level()
+    
+    def check_if_con_mana_more_than_stat(self,skill_stat: Skill | Stat):
+        returnstat =  self.condensed_mana.level > skill_stat.mana_to_next_level
+        return returnstat
+    
+    def increase_skill_level(self, skill=  Skill, level=1):
+        print("in INcrease_Skill_Level")
+        pass
+    def increase_stat_level(self, stat=  Stat, level=1):
+        print('in increase_stat_level')
+        for _ in range(level):
+            print(f'\nstat level: {stat.level}\n total_mana: {self.condensed_mana.level}\n mana_requirement: {stat.mana_to_next_level}\n actual_mana_requirement: {stat.actual_mana_to_next_level}')
+            if self.check_if_con_mana_more_than_stat(skill_stat=stat,):
+                self.use_condensed_mana(stat.mana_to_next_level)
+                self.increase_next_level_requirement(stat=stat, level = 1)
+                stat.level += 1
+        pass
+
+    def old_increase_stat_level(self, stat=None, level=1):
         quit_flag = False
         if not isinstance(stat, Stat) and not isinstance(stat, Skill):
             print( "Type Error: selected stat is not a type <Stat> or <Skill>.")
@@ -429,16 +470,22 @@ class Character():
         else:
             flag = self.increase_stat_level(stat, level=level)
             if flag:
-                print('got passed the flag', level)
+                #print('got passed the flag\n', self)
                 for _ in range(level):
+                    print("in the loop for:", stat.name)
+    ### SOMETHING IS WRONG OVER HERE
+                    print('Condensed mana:', self.condensed_mana.level)
                     self.use_condensed_mana(stat.mana_to_next_level)
+                    print(stat.name, stat.level,'Condensed mana:', self.condensed_mana.level)
                     self.total_condensed_mana.level += stat.mana_to_next_level
+                    print('mana to next level:', stat.actual_mana_to_next_level)
                     stat._total_mana_used += stat.mana_to_next_level
                     self.increase_next_level_requirement(stat=stat, level=level)
+
             print('got out of the flag')
             self.calculate_character_level()
     
-    def increase_next_level_requirement(self, stat: Stat | Skill, level):
+    def increase_next_level_requirement(self, stat: Stat | Skill, level=1):
         next_actual_level_requirement = stat.actual_mana_to_next_level * (self.mana_requirement_increaser ** level)
         stat.actual_mana_to_next_level = next_actual_level_requirement
 
