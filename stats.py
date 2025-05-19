@@ -304,6 +304,13 @@ class Skill(Attribute):
         self.calculate_capacity_multiplier()
         self.mastery= None
     
+    @property 
+    def tagged_stats(self):
+        return self._tagged_stats
+    @tagged_stats.setter
+    def tagged_stats(self, level):
+        self._tagged_stats = level
+    
     @property
     def basics(self):
         return self._basics
@@ -391,7 +398,6 @@ class SkillStat(Attribute):
     # takes the amount of mana used on the skills in dict_of_skills and sets the 
     # level of the SkillStat based on it.
     def calculate_level(self):
-        print(f'calculating {self.name} at {self.level}')
         amount_of_mana = 0
         for skill in self.dict_of_skills.values():
             amount_of_mana += skill.total_mana_used
@@ -402,7 +408,6 @@ class SkillStat(Attribute):
 
         while actual_current_level_cost <= amount_of_mana:
             self.level += 1
-            print(self.name, self.level)
             amount_of_mana -= ceil(actual_current_level_cost)
             actual_current_level_cost = actual_current_level_cost * (1.008 ** self.level)
         self.actual_mana_to_next_level = actual_current_level_cost
