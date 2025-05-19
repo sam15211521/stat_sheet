@@ -258,7 +258,9 @@ class RightWidget(QWidget):
             self.character_select_button.setDisabled(False)
 
 class Character_screen(QMainWindow):
-    def __init__(self, character: Character = Character(name= "Default", race= "Human" )):
+    def __init__(self, 
+                 character: Character = Character(name= "Default", 
+                                                  race= "Human" )):
         super().__init__()
         self.central_widget = QWidget()
         self.central_widget_layout = QStackedLayout()
@@ -283,6 +285,13 @@ class Character_screen(QMainWindow):
         self.addToolBar(self.tool_bar)
         self.tool_bar.addAction(self.stat_screen_button)
         self.tool_bar.addAction(self.skill_screen_button)
+
+        self.file_menu = QMenu(self)
+        action = QAction("Save", self)
+        self.file_menu.addAction(action)
+        self.menu_action = self.tool_bar.addWidget(self.file_menu)
+
+        self.tool_bar.addAction(self.menu_action)
 
         #layout logic
         self.stat_window_layout = QGridLayout()
@@ -581,60 +590,60 @@ class Skills_list(QFrame):
 
     
     def add_skills(self):
-        #Skill Name | Skill Level | Basics | Mastery | Discription | Tagged Stats | Mult | Total lvl Cost
+#Skill Name | Skill Level | Basics | Mastery | Discription | Tagged Stats | Mult | Total lvl Cost
         for skill in self.skills.values():
             skill : Skill
+            self.skill_information_window = skill_information(self, 
+                                                              self.character,
+                                                              skill)
             skill_name = skill.name
+            button_height = 70
             print(skill_name)
             skill_name_button = QPushButton(skill.name)
             skill_level_button = QPushButton(str(skill.level))
             skill_basics_button = QPushButton(str(skill.basics))
             skill_mastery_button = QPushButton(skill.mastery.name)
-            skill_tagged_stats = QPushButton('press_for_more')
-            skill_multipliable = QPushButton()
+            skill_tagged_stats = QPushButton("tagged\nskills")
+            skill_multipliable = QPushButton(str(skill.stat_multiplier))
 
+            skill_name_button.setFixedHeight(button_height)
+            skill_level_button.setFixedHeight(button_height)
+            skill_basics_button.setFixedHeight(button_height)
+            skill_mastery_button.setFixedHeight(button_height)
+            skill_mastery_button.setFixedHeight(button_height)
+            skill_multipliable.setFixedHeight(button_height)
 
             skill_name_button.clicked.connect(lambda checked=True, name=skill.name: print(name))
             skill_level_button.clicked.connect(lambda checked=True, level=skill.level: print(level))
             skill_basics_button.clicked.connect(lambda checked=True, basics=skill.basics: print(basics))
+            skill_mastery_button.clicked.connect(self.skill_information_window.show)
 
             self._layout.addWidget(skill_name_button,self.row, 0 )
             self._layout.addWidget(skill_level_button, self.row, 1)
             self._layout.addWidget(skill_basics_button, self.row, 2)
             self._layout.addWidget(skill_mastery_button, self.row, 3)
             self._layout.addWidget(skill_tagged_stats, self.row, 4)
+            self._layout.addWidget(skill_multipliable ,self.row, 5)
+
+
+
 
             self.row += 1
-    
-    
+
     def print_skill_name(self, n):
         print(n)
     
     def print_level_name(self, level):
         print(level)
 
-class skill_button(QPushButton):
-    def __init__(self,skill, kind):
-        #Skill Name | Skill Level | Basics | Mastery | Discription | Tagged Stats | Mult | Total lvl Cost
+class skill_information(QMainWindow):
+    def __init__(self,
+                 parent: Skills_list,
+                 character: Character,
+                 stat:Stat):
         super().__init__()
-        self._skill = skill
-        if kind == "name":
-            self.setText(self._skill.name)
-        if kind == "level":
-            self.setText(str(self._skill.level))
-        if kind == "basics":
-            self.setText(self._skill.name)
-        self.sheet =  """
-                QPushButton {padding: 0px; 
-                                    margin: 0px; 
-                                    border: 2px solid black; 
-                                    background-color: #1c548b;
-                                    font: 18pt;
-                                    color: black; 
-                                    }
-                                    """
-        self.setStyleSheet(self.sheet)
-
+        self.main_Screen = QWidget()
+        self.setCentralWidget(self.main_Screen)
 
 class MainStatFrame(QLabel):
     def __init__(self,
@@ -717,6 +726,7 @@ class MainStatFrame(QLabel):
          print(f"button {self.statname} Name is pressed")
     def print_conf_level(self):
          print(f"button {self.statname} Level: {self.statlevel} is pressed")
+    
     
 class StatIncreaseWindow(QMainWindow):
     def __init__(self, 
