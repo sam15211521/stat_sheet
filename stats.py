@@ -182,11 +182,13 @@ class Stat(Attribute):
                  mana_multiplier=1, 
                  mana_capacity_flag=False,
                  level = 0,
-                 affects_character_level = False
+                 affects_character_level = False,
+                 is_taggable = False
                  ):
         super().__init__(name, discription, mana_multiplier, mana_capacity_flag, level)
         
-        self._acronym = self.name[:3]
+        self._acronym = self.name[:3].upper()
+        self._is_taggable = is_taggable
 
         self._isparent = isparent
         self._child_stats = {}
@@ -292,6 +294,20 @@ class Skill(Attribute):
         self._mastery = basic
         self._tagged_stats = {}
         self._stat_multiplier = self.mastery.multiplier
+    @property
+    def tagged_stats(self):
+        return self._tagged_stats
+    @tagged_stats.setter
+    def tagged_stats(self, dic):
+        self._tagged_stats = dic
+    
+
+    @property
+    def stat_multiplier(self):
+        return self._stat_multiplier
+    @stat_multiplier.setter
+    def stat_multiplier(self, value):
+        self._stat_multiplier = value
     
     @property
     def level(self):
@@ -421,3 +437,6 @@ class SkillStat(Attribute):
     def increase_next_level_requirement(self, stat: Stat | Skill, level):
         next_actual_level_requirement = stat.actual_mana_to_next_level * (1.008 ** level)
         stat.actual_mana_to_next_level = next_actual_level_requirement
+
+a = Stat("Beauty")
+print(a._acronym)

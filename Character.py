@@ -9,6 +9,7 @@ class Character():
         self._dict_of_major_stats = {}
         self._dict_of_stats = {}
         self._dict_of_stats_affecting_level = {}
+        self._dict_of_taggable_stats = {}
         self._mana_requirement_increaser = 1.008
         self._stat_strengthening_increaser = 1.01
         self._name = name
@@ -36,10 +37,12 @@ class Character():
         self.strength = Stat(name = "Strength", 
                              isparent=True, 
                              affects_character_level=True)
-        self.physical_strength = Stat(name = "Physical Strength")
+        self.physical_strength = Stat(name = "Physical Strength",
+                                      is_taggable=True)
         self.magical_strength = Stat(name = "Mana Strength",
                                      mana_capacity_flag=True,
-                                     mana_multiplier=1.5)
+                                     mana_multiplier=1.5,
+                                     is_taggable=True)
         self.strength.add_child_stat(self.physical_strength, 
                                      self.magical_strength)
 
@@ -47,10 +50,13 @@ class Character():
         self.resistance = Stat(name="Resistance", 
                                isparent=True,
                                affects_character_level=True)
-        self.physical_resistance = Stat(name="Physical Resistance")
+        self.physical_resistance = Stat(name="Physical Resistance",
+                                     is_taggable=True)
         self.magic_resistance = Stat(name="Mana Resistance",
-                                     mana_capacity_flag=True)
-        self.spiritual_resistance = Stat(name="Spiritual Resistance")
+                                     mana_capacity_flag=True,
+                                     is_taggable=True)
+        self.spiritual_resistance = Stat(name="Spiritual Resistance",
+                                     is_taggable=True)
         self.resistance.add_child_stat(self.physical_resistance,
                                        self.magic_resistance,
                                        self.spiritual_resistance)
@@ -59,9 +65,11 @@ class Character():
         self.regeneration = Stat(name="Regeneration", 
                                  isparent=True,
                                  affects_character_level=True)
-        self.health_regen = Stat(name="Health Regeneration")
+        self.health_regen = Stat(name="Health Regeneration",
+                                     is_taggable=True)
         self.mana_regen= Stat(name="Mana Regeneration",
-                              mana_capacity_flag=True)
+                              mana_capacity_flag=True,
+                                     is_taggable=True)
         self.regeneration.add_child_stat(self.health_regen,
                                          self.mana_regen)
         
@@ -69,9 +77,11 @@ class Character():
         self.endurance = Stat(name="Endurance", 
                               isparent=True,
                               affects_character_level=True)
-        self.physical_endurance = Stat(name="Physical Endurance")
+        self.physical_endurance = Stat(name="Physical Endurance",
+                                     is_taggable=True)
         self.magic_endurance = Stat(name="Magic_Endurance",
-                                    mana_capacity_flag=True)
+                                    mana_capacity_flag=True,
+                                     is_taggable=True)
         self.endurance.add_child_stat(self.physical_endurance,
                                       self.magic_endurance)
         
@@ -79,8 +89,10 @@ class Character():
         self.agility = Stat(name="Agility", 
                             isparent=True,
                             affects_character_level=True)
-        self.speed = Stat(name="Speed")
-        self.coordination = Stat(name="Coordination")
+        self.speed = Stat(name="Speed",
+                                     is_taggable=True)
+        self.coordination = Stat(name="Coordination",
+                                     is_taggable=True)
         self.agility.add_child_stat(self.speed, 
                                     self.coordination)
         
@@ -103,6 +115,7 @@ class Character():
         self.calculate_max_mana()
         self.current_mana.level = self.max_mana.level
         self.add_to_dict_stats_and_major_stats()
+        print(self._dict_of_taggable_stats)
     
     def __str__(self):
         string = f"""
@@ -378,7 +391,9 @@ class Character():
             if not bool(self.dict_of_stats):
 
                 temp = [stat for stat in list(self.__dict__.values()) 
-                        if isinstance(stat, Stat) | isinstance(stat, CondensedMana) | isinstance(stat, SkillStat)]
+                        if (isinstance(stat, Stat) |
+                            isinstance(stat, CondensedMana) | 
+                            isinstance(stat, SkillStat))]
 
                 for stat in temp:
                     if stat.name == "Condensed Mana":
@@ -386,6 +401,12 @@ class Character():
                     elif stat.affects_character_level:
                         self._dict_of_stats_affecting_level[stat.name] = stat
                     self.dict_of_stats[stat.name] = stat
+                
+                for stat in self.dict_of_stats.values():
+                    if isinstance(stat, Stat) and stat._is_taggable:
+                        self._dict_of_taggable_stats[stat.name] = stat
+
+
 
 
 
@@ -441,3 +462,5 @@ class Character():
     def increase_next_level_requirement(self, stat: Stat | Skill, level=1):
         next_actual_level_requirement = stat.actual_mana_to_next_level * (self.mana_requirement_increaser ** level)
         stat.actual_mana_to_next_level = next_actual_level_requirement
+
+a = Character("BB")
