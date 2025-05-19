@@ -6,7 +6,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 from PySide6.QtWidgets import *
 from PySide6.QtCore import *
 from PySide6.QtGui import *
-from stats import Stat, MajorStat
+from stats import Stat, MajorStat, Skill, SkillStat
 from Character import Character
 
 
@@ -262,13 +262,14 @@ class Character_screen(QMainWindow):
         super().__init__()
         self.central_widget = QWidget()
         self.central_widget_layout = QStackedLayout()
+        self.character = character
+        self.skill_window_layout = QGridLayout()
 
         self.stat_window = QFrame()
-        self.skill_window = QFrame()
+        self.skill_window = Skill_Screen(parent=self, character=self.character)
 
         self.central_widget_layout.addWidget(self.stat_window)
         self.central_widget_layout.addWidget(self.skill_window)
-        self.character = character
 
         self.stat_screen_button = QAction("Stats", self)
         self.stat_screen_button.setCheckable(True)
@@ -287,15 +288,11 @@ class Character_screen(QMainWindow):
         self.stat_window_layout = QGridLayout()
         self.stat_window.setLayout(self.stat_window_layout)
 
-        self.skill_window_layout = QGridLayout()
         self.skill_window.setLayout(self.skill_window_layout)
 
         self.central_widget.setLayout(self.central_widget_layout)
         self.setCentralWidget(self.central_widget)
         self.stat_screen()
-
-
-
 
     def stat_screen(self):
         self.skill_screen_button.setChecked(False)
@@ -336,29 +333,34 @@ class Character_screen(QMainWindow):
         ##      Row 5
         self.physical_resistance = MainStatFrame(self.character.physical_resistance, 
                                                 self.character,
-                                                self, 
+                                                self,
+                                                parent_stat=self.resistance,
                                                 mainstat=False
                                             )
         self.physical_strength = MainStatFrame(self.character.physical_strength, 
                                             self.character,
                                             self,
+                                            parent_stat=self.strength,
                                             mainstat=False
                                             )
         ##      Row 6
         self.magic_resistance = MainStatFrame(self.character.magic_resistance, 
                                             self.character,
                                             self,
+                                            parent_stat=self.resistance,
                                             mainstat=False
                                             )
         self.magic_strength = MainStatFrame(self.character.magical_strength, 
                                             self.character,
                                             self,
+                                            parent_stat=self.strength,
                                             mainstat=False
                                             )
         ##      Row 7
         self.spiritual_resistance = MainStatFrame(self.character.spiritual_resistance, 
                                                 self.character,
                                                 self,
+                                                parent_stat=self.resistance,
                                                 mainstat=False)
         self.endurance = MainStatFrame(self.character.endurance, 
                                     self.character,
@@ -370,20 +372,24 @@ class Character_screen(QMainWindow):
         self.physical_endurance = MainStatFrame(self.character.physical_endurance,
                                         self.character,
                                         self,
+                                        parent_stat=self.endurance,
                                         mainstat=False)
         ##      Row 9
         self.health_regeneration = MainStatFrame(self.character.health_regen,
                                         self.character,
                                         self,
+                                        parent_stat=self.regeneration,
                                         mainstat=False)
         self.magic_endurance = MainStatFrame(self.character.magic_endurance,
                                         self.character,
                                         self,
+                                        parent_stat=self.endurance,
                                         mainstat=False)
         ##      Row 10
         self.magic_regeneration = MainStatFrame(self.character.mana_regen,
                                         self.character,
                                         self,
+                                        parent_stat=self.regeneration,
                                         mainstat=False)
         self.agility = MainStatFrame(self.character.agility,
                                         self.character,
@@ -396,11 +402,13 @@ class Character_screen(QMainWindow):
         self.speed = MainStatFrame(self.character.speed,
                                         self.character,
                                         self,
+                                        parent_stat=self.agility,
                                         mainstat=False)
         ##      Row 12
         self.coordination = MainStatFrame(self.character.coordination,
                                         self.character,
                                         self,
+                                        parent_stat=self.agility,
                                         mainstat=False)
 
         ##Layout of the screen
@@ -471,24 +479,176 @@ class Character_screen(QMainWindow):
                                     }
 """
         self.setStyleSheet(self.stylesheet)
+
     def skill_screen(self):
         self.stat_screen_button.setChecked(False)
         self.central_widget_layout.setCurrentIndex(1)
-        self.testing = QLabel("Hello")
-        self.skill_window_layout.addWidget(self.testing,0,0)
-
+        #self.skillScreen = Skill_Screen(parent=self, character=self.character)
+        #self.skill_window_layout.addWidget(self.skill_screen_tab)
         
+
+
+class Skill_Screen(QFrame):
+    def __init__(self, parent: Character_screen, character:Character = None):
+        super().__init__()
+        #self.setMinimumSize(200, 200)
+        self._parent = parent
+        self.skill_window_layout = self._parent.skill_window_layout
+        self.character = character
+        self.setLayout(self.skill_window_layout)
+        #print(self.character.skills_level.name)
+        self.stylesheet = """
+                        QLabel#skillname { padding: 0px; 
+                                    margin: 0px; 
+                                    border: 2px solid black; 
+                                    background-color: #0e2841;
+                                    font: 18pt;
+                                    color: white
+                                    }
+                        QLabel#skilllevel { padding: 0px; 
+                                    margin: 0px; 
+                                    border: 2px solid black; 
+                                    background-color: #0e2841;
+                                    font: 18pt;
+                                    color: white
+                                    }
+"""
+        self.setStyleSheet(self.stylesheet)
+
+        #self.skill_name_and_level_frame = QFrame()
+        #self.skill_name_and_level_frame_layout = QGridLayout()
+        #self.skill_name_and_level_frame_layout.setSpacing(0)
+
+        #Row 1
+        self.skill_name = QLabel(self.character.skills_level.name)
+        self.skill_name.setObjectName("skillname")
+        self.skill_name.setAlignment(Qt.AlignCenter)
+        self.skill_name.setStyleSheet("QLabel { border: 2px solid black; padding 5px}")
+        self.skill_name.setFixedHeight(30)
+
+        self.skill_level = QLabel(str(self.character.skills_level.level))
+        self.skill_level.setObjectName("skilllevel")
+        self.skill_level.setAlignment(Qt.AlignCenter)
+        self.skill_level.setStyleSheet("QLabel { border: 2px solid black; padding 5px}")
+        self.skill_level.setFixedHeight(30)
+
+        #Row2
+        self.list_of_skills = Skills_list(self.character)
+
+        #within the scrollarea
+        self.skill_button_list = {}
+
+
+        #layout logic
+        self.skill_window_layout.setSpacing(0)
+        #row 1
+
+        self.skill_window_layout.addWidget(self.skill_name,0,0)
+        self.skill_window_layout.addWidget(self.skill_level,0,1)
+
+        #Row2
+        self.skill_window_layout.addWidget(self.list_of_skills,1,0,1,2)
+
+        # Within the skill list
+
+class Skills_list(QFrame):
+    def __init__(self, character: Character):
+        super().__init__()
+        self.setStyleSheet("QFrame {border: 2px solid blue}")
+        self.character = character
+        self.skills = self.character.skills_level.dict_of_skills
+
+        self.skill_buttons = {}
+
+        self.row = 0
+        self._layout = QGridLayout()
+        self.add_skills()
+        self._layout.setAlignment(Qt.AlignTop)
+
+        self.setLayout(self._layout)
+        self._current_skill = None
+        self._layout.setSpacing(0)
+        self.sheet =  """
+                QPushButton {padding: 0px; 
+                                    margin: 0px; 
+                                    border: 2px solid black; 
+                                    background-color: #1c548b;
+                                    font: 18pt;
+                                    color: black; 
+                                    }
+                                    """
+        self.setStyleSheet(self.sheet)
+
+    
+    def add_skills(self):
+        #Skill Name | Skill Level | Basics | Mastery | Discription | Tagged Stats | Mult | Total lvl Cost
+        for skill in self.skills.values():
+            skill : Skill
+            skill_name = skill.name
+            print(skill_name)
+            skill_name_button = QPushButton(skill.name)
+            skill_level_button = QPushButton(str(skill.level))
+            skill_basics_button = QPushButton(str(skill.basics))
+            skill_mastery_button = QPushButton(skill.mastery.name)
+            skill_tagged_stats = QPushButton('press_for_more')
+            skill_multipliable = QPushButton()
+
+
+            skill_name_button.clicked.connect(lambda checked=True, name=skill.name: print(name))
+            skill_level_button.clicked.connect(lambda checked=True, level=skill.level: print(level))
+            skill_basics_button.clicked.connect(lambda checked=True, basics=skill.basics: print(basics))
+
+            self._layout.addWidget(skill_name_button,self.row, 0 )
+            self._layout.addWidget(skill_level_button, self.row, 1)
+            self._layout.addWidget(skill_basics_button, self.row, 2)
+            self._layout.addWidget(skill_mastery_button, self.row, 3)
+            self._layout.addWidget(skill_tagged_stats, self.row, 4)
+
+            self.row += 1
+    
+    
+    def print_skill_name(self, n):
+        print(n)
+    
+    def print_level_name(self, level):
+        print(level)
+
+class skill_button(QPushButton):
+    def __init__(self,skill, kind):
+        #Skill Name | Skill Level | Basics | Mastery | Discription | Tagged Stats | Mult | Total lvl Cost
+        super().__init__()
+        self._skill = skill
+        if kind == "name":
+            self.setText(self._skill.name)
+        if kind == "level":
+            self.setText(str(self._skill.level))
+        if kind == "basics":
+            self.setText(self._skill.name)
+        self.sheet =  """
+                QPushButton {padding: 0px; 
+                                    margin: 0px; 
+                                    border: 2px solid black; 
+                                    background-color: #1c548b;
+                                    font: 18pt;
+                                    color: black; 
+                                    }
+                                    """
+        self.setStyleSheet(self.sheet)
+
+
 class MainStatFrame(QLabel):
     def __init__(self,
                  stat:Stat | str | MajorStat, 
                  character:Character, 
                  parent:Character_screen, 
-                 mainstat = True):
+                 parent_stat: Stat = False, 
+                 mainstat = True,):
         super().__init__()
         self.mainstat = mainstat
         self.stat = stat
         self._character = character
         self._parent = parent
+        self.parent_stat = parent_stat
         if isinstance(self.stat, Stat) or isinstance(self.stat, MajorStat):
             self.statname = self.stat.name
             self.statlevel = self.stat.level
@@ -534,6 +694,7 @@ class MainStatFrame(QLabel):
                                     color: black}
                                     """
                 )
+        
         if self.statname == "Energy Potential":
             self._name.setFixedHeight(72)
             self._level.setFixedHeight(72)
@@ -549,6 +710,8 @@ class MainStatFrame(QLabel):
     def update_frames(self):
         self._name.setText(self.stat.name)
         self._level.setText(str(self.stat.level))
+        if self.parent_stat:
+            self.parent_stat.update_frames()
 
     def print_conf_name(self):
          print(f"button {self.statname} Name is pressed")
@@ -641,6 +804,10 @@ class StatIncreaseWindow(QMainWindow):
 
 
 
+
+
+    pass
+
 def main():
     app = QApplication()
     app.setStyle('Fusion')
@@ -649,13 +816,7 @@ def main():
     window.resize(800, 600)
     window.show()
     sys.exit(app.exec())
-
-
-
-class Character_Stat_Screen(QFrame):
-    def __init__(self):
-        super().__init__()
-
 if __name__ == "__main__":
-    os.system("cls")
     main()
+
+
