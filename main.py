@@ -16,16 +16,16 @@ def clearscreen():
 ####################
 ben = Character("Ben",body_mana_multiplier=2722) #hiden stat = 15.327
 
-print(ben.skills_level.dict_of_skills)
+#print(ben.skills_level.dict_of_skills)
 ben.add_skill(Skill('Mana Circulation'))
 
 
 #print(ben.dict_of_skills)
 
-info = Character()
+#info = Character()
 def save():
     with open(abs_file_path, 'wb') as File:
-        print(ben.skills_level.dict_of_skills)
+        #print(ben.skills_level.dict_of_skills)
         pickle.dump(ben, File)
 
 def load():
@@ -36,13 +36,14 @@ def load():
 
 
 def main():
+    #clearscreen()
     #app = QApplication()
     #window = MainWindow('ex')
     #window.show()
     #sys_exit(app.exec())
     save()
     person = load()
-    print(person.skills_level.dict_of_skills)
+    #print(person.skills_level.dict_of_skills)
 
 
 if __name__ == "__main__":
