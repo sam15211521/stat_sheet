@@ -275,6 +275,7 @@ class Character():
         for stat in self._dict_of_stats_affecting_level.values():
             #print(stat.name, stat.level)
             sum_of_levels += stat.level
+        
         temp_level = math.floor(sum_of_levels / num_of_levels)
         #print('temp level:', temp_level)
 
@@ -283,11 +284,12 @@ class Character():
     
     def add_skill(self, skill):
         if isinstance(skill, Skill):
-            self._dict_of_skills[skill.name] = skill
-            self.skills_level.dict_of_skills[skill.name] = skill
-            self.calculate_character_level()
-            if skill.affects_mana_capacity:
-                self.add_skill_to_mana_calc(skill)
+            if skill not in self._dict_of_skills:
+                self._dict_of_skills[skill.name] = skill
+                self.skills_level.dict_of_skills[skill.name] = skill
+                self.calculate_character_level()
+                if skill.affects_mana_capacity:
+                    self.add_skill_to_mana_calc(skill)
     
     def use_condensed_mana(self, amount):
         self.condensed_mana.level -= amount
