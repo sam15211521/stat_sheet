@@ -1,0 +1,7 @@
+- Make a skill screen
+    -add a way to increas number of skills
+    -add a way to increase the level of skills
+
+
+
+- Make a fighting screen
