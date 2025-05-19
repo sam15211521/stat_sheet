@@ -30,7 +30,7 @@ class Attribute():
     
     def __str__(self):
         line1 = f"{self.name} | Level: {self.level:,} "
-        line2 = f"mana to next level: {self.total_mana_used}"
+        line2 = f"mana to next level: {self._mana_to_next_level}"
         line3 = self.discription
         return "\n".join([line1, line2, line3])
     
@@ -195,6 +195,21 @@ class Stat(Attribute):
         self._parent_stat = None
         self._power = 1
         self._affects_character_level = affects_character_level
+        self._effective_level = 1
+        self._skills_effecting_stat ={}
+    @property
+    def effective_level(self):
+        return self._effective_level
+    @effective_level.setter
+    def effective_level(self, level):
+        self._effective_level = level 
+    
+    @property
+    def skills_effecting_stats(self):
+        return self._skills_effecting_stat
+    @skills_effecting_stats.setter
+    def skills_effecting_stats(self, skill):
+        self._skills_effecting_stat[skill] = skill
 
     
     @property
@@ -288,11 +303,20 @@ class Stat(Attribute):
         pass
 
 class Skill(Attribute):
-    def __init__(self, name='', discription='', mana_multiplier=1, mana_capacity_flag=False, level=0):
+    def __init__(self, 
+                 name='', 
+                 discription='', 
+                 mana_multiplier=1, 
+                 mana_capacity_flag=False, 
+                 level=0,
+                 tagged_stats = [],
+                 stat_increase_multiplier=1):
         super().__init__(name, discription, mana_multiplier, mana_capacity_flag, level)
         self._basics = False
         self._mastery = basic
+        self._stats_to_tag = tagged_stats
         self._tagged_stats = {}
+        self._stat_increase_multiplier = stat_increase_multiplier
         self._stat_multiplier = self.mastery.multiplier
     @property
     def tagged_stats(self):
@@ -317,15 +341,9 @@ class Skill(Attribute):
     def level(self, level):
         self._level = level
         self.power = None
-        self.calculate_capacity_multiplier()
         self.mastery= None
-    
-    @property 
-    def tagged_stats(self):
-        return self._tagged_stats
-    @tagged_stats.setter
-    def tagged_stats(self, level):
-        self._tagged_stats = level
+        self.calculate_capacity_multiplier()
+        self.calculate_stat_multiplier()
     
     @property
     def basics(self):
@@ -367,6 +385,15 @@ class Skill(Attribute):
                 if self.mastery.name != master.name:
                     self._master = master
                     self.calculate_capacity_multiplier()
+    
+    def calculate_stat_multiplier(self):
+        # statincrease_multi ** (level *mastery_multiplier) 
+        if self._stat_increase_multiplier > 1:
+            return
+        else:
+            self.stat_multiplier = round((1 + self._stat_increase_multiplier) **(self.level * self.mastery.multiplier), 8)
+        
+            
     
     def calculate_capacity_multiplier(self):
         #need an initial value based on the type of skill
@@ -437,6 +464,3 @@ class SkillStat(Attribute):
     def increase_next_level_requirement(self, stat: Stat | Skill, level):
         next_actual_level_requirement = stat.actual_mana_to_next_level * (1.008 ** level)
         stat.actual_mana_to_next_level = next_actual_level_requirement
-
-a = Stat("Beauty")
-print(a._acronym)
