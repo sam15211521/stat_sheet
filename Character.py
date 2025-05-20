@@ -450,7 +450,7 @@ class Character():
                 #print(f'{stat.name} in self.dict_of_stats and is not a parent')
                 self.increase_stat_level(stat=stat, level=level)
             elif stat.name in self.skills_level.dict_of_skills:
-                self.increase_skill_level(stat, level = level)
+                self.increase_skill_level(skill=stat, level = level)
         self.calculate_max_mana()
         self.calculate_effective_stat_level()
     
@@ -458,7 +458,7 @@ class Character():
         returnstat =  self.condensed_mana.level > skill_stat.mana_to_next_level
         return returnstat
     
-    def increase_skill_level(self, skill=  Skill, level=1):
+    def increase_skill_level(self, skill: Skill, level=1):
         #print("in INcrease_Skill_Level")
         for _ in range(level):
             #print(f'\n{skill.name} {id(skill)} Level: {skill.level}\n total_mana: {self.condensed_mana.level}\n mana_requirement: {skill.mana_to_next_level}\n actual_mana_requirement: {skill.actual_mana_to_next_level}')
@@ -498,28 +498,28 @@ class Character():
         next_actual_level_requirement = stat.actual_mana_to_next_level * (self.mana_requirement_increaser ** level)
         stat.actual_mana_to_next_level = next_actual_level_requirement
 
-a = Character("BB")
-a.add_condensed_mana(500)
-a.increase_stat_or_skill_level(a.physical_strength,8)
-#print(a.physical_strength.level)
-a.add_skill(Skill("attack", tagged_stats=[a.physical_strength, 
-                                          a.physical_resistance, a.physical_resistance],
-                                          stat_increase_multiplier=0.003))
-print('___',a.dict_of_skills['attack'], f'physical: {a.physical_strength.effective_level}','___', sep='\n')
-a.increase_stat_or_skill_level(a.dict_of_skills['attack'],25)
-print(a.dict_of_skills['attack'])
-
-print('____________________',
-      a.physical_strength.name, 
-      a.physical_strength.level,
-      a.physical_strength.effective_level, 
-      sep='\n')
-a.increase_stat_or_skill_level(a.physical_strength,12)
-print('____________________',
-      a.physical_strength.name, 
-      a.physical_strength.level,
-      a.physical_strength.effective_level, 
-      sep='\n')
-#a.add_skill(Skill("power", tagged_stats=[a.physical_strength, 
+#a = Character("BB")
+#a.add_condensed_mana(500)
+#a.increase_stat_or_skill_level(a.physical_strength,8)
+##print(a.physical_strength.level)
+#a.add_skill(Skill("attack", tagged_stats=[a.physical_strength, 
 #                                          a.physical_resistance, a.physical_resistance],
+#                                          stat_increase_multiplier=0.003))
+#print('___',a.dict_of_skills['attack'], f'physical: {a.physical_strength.effective_level}','___', sep='\n')
+#a.increase_stat_or_skill_level(a.dict_of_skills['attack'],25)
+#print(a.dict_of_skills['attack'])
+#
+#print('____________________',
+#      a.physical_strength.name, 
+#      a.physical_strength.level,
+#      a.physical_strength.effective_level, 
+#      sep='\n')
+#a.increase_stat_or_skill_level(a.physical_strength,12)
+#print('____________________',
+#      a.physical_strength.name, 
+#      a.physical_strength.level,
+#      a.physical_strength.effective_level, 
+#      sep='\n')
+##a.add_skill(Skill("power", tagged_stats=[a.physical_strength, 
+##                                          a.physical_resistance, a.physical_resistance],
 #                                          stat_increase_multiplier=0.003))
