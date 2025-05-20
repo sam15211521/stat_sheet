@@ -18,6 +18,8 @@ ben = Character("Ben",body_mana_multiplier=2722) #hiden stat = 15.327
 
 #print(ben.skills_level.dict_of_skills)
 ben.add_skill(Skill('Mana Circulation'))
+ben.add_condensed_mana(50)
+ben.add_skill(Skill('Mana Condensing'))
 
 
 #print(ben.dict_of_skills)
@@ -43,6 +45,7 @@ def main():
     #sys_exit(app.exec())
     save()
     person = load()
+    print(person)
     #print(person.skills_level.dict_of_skills)
 
 
