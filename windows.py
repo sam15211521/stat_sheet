@@ -542,7 +542,11 @@ class Skill_Screen(QFrame):
         self.skill_level.setFixedHeight(30)
 
         #Row2
+        self.scrollarea = QScrollArea()
+        self.scrollarea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.list_of_skills = Skills_list(self.character)
+        self.scrollarea.setWidgetResizable(True)
+        self.scrollarea.setWidget(self.list_of_skills)
 
         #within the scrollarea
         self.skill_button_list = {}
@@ -556,23 +560,25 @@ class Skill_Screen(QFrame):
         self.skill_window_layout.addWidget(self.skill_level,0,1)
 
         #Row2
-        self.skill_window_layout.addWidget(self.list_of_skills,1,0,1,2)
+        self.skill_window_layout.addWidget(self.scrollarea,1,0,1,2)
 
         # Within the skill list
 
-class Skills_list(QFrame):
+class Skills_list(QWidget):
     def __init__(self, character: Character):
         super().__init__()
         self.setStyleSheet("QFrame {border: 2px solid blue}")
         self.character = character
         self.skills = self.character.skills_level.dict_of_skills
 
+        self.skill_info_window = {}
         self.skill_buttons = {}
 
         self.row = 0
         self._layout = QGridLayout()
         self.add_skills()
         self._layout.setAlignment(Qt.AlignTop)
+
 
         self.setLayout(self._layout)
         self._current_skill = None
@@ -586,33 +592,52 @@ class Skills_list(QFrame):
                                     color: black; 
                                     padding: 0px
                                     }
+                    
                 QFrame { padding: 0px;
                          margin: 0px}
                                     """
         self.setStyleSheet(self.sheet)
+    
+    #def add_skills(self):
+    #    for skill in self.skills.values():
+    #        skill : Skill
 
     
     def add_skills(self):
 #Skill Name | Skill Level | Basics | Mastery | Discription | Tagged Stats | Mult | Total lvl Cost
         for skill in self.skills.values():
             skill : Skill
+            self.skill_row = {}
 
             #skill_frame = SkillFrame(self,
             #                          self.character,
             #                          skill)
-            self.skill_buttons[skill.name] = skill_frame
+            #self.skill_buttons[skill.name] = skill_frame
+            #print('3212',skill.name, self.row)
             #self._layout.addWidget(skill_frame, self.row,0)
-            self.row += 1
-            continue
-            skill_name = skill.name
+            #self.row += 1
+            
             button_height = 70
-            print(skill_name)
+            self.skill_row['skill'] = skill
             skill_name_button = QPushButton(skill.name)
+            self.skill_row['name'] = skill_name_button
+
             skill_level_button = QPushButton(str(skill.level))
+            self.skill_row['level'] = skill_level_button
+
             skill_basics_button = QPushButton(str(skill.basics))
+            self.skill_row['basics'] = skill_basics_button
+
             skill_mastery_button = QPushButton(skill.mastery.name)
+            self.skill_row['mastery'] = skill_mastery_button
+
             skill_tagged_stats = QPushButton("tagged\nskills")
+            self.skill_row['tagged stats'] = skill_tagged_stats
+
             skill_multipliable = QPushButton(str(skill.stat_multiplier))
+            self.skill_row['multiplier'] = skill_multipliable
+
+
 
             skill_name_button.setFixedHeight(button_height)
             skill_level_button.setFixedHeight(button_height)
@@ -621,10 +646,15 @@ class Skills_list(QFrame):
             skill_tagged_stats.setFixedHeight(button_height)
             skill_multipliable.setFixedHeight(button_height)
 
-            skill_name_button.clicked.connect(lambda checked=True, name=skill.name: print(name))
-            skill_level_button.clicked.connect(lambda checked=True, level=skill.level: print(level))
-            skill_basics_button.clicked.connect(lambda checked=True, basics=skill.basics: print(basics))
-            skill_mastery_button.clicked.connect(skill_information_window.show)
+            skill_information_window = SkillInformation(self, character=self.character, skill= skill)
+            self.skill_buttons[skill.name] = self.skill_row
+            self.skill_info_window[skill.name] = skill_information_window
+
+            #skill_name_button.clicked.connect(skill_information_window.show)
+            skill_level_button.clicked.connect(skill_information_window.show)
+
+            #skill_basics_button.clicked.connect(skill_information_window.show)
+            #skill_mastery_button.clicked.connect(skill_information_window.show)
 
             self._layout.addWidget(skill_name_button,self.row, 0 )
             self._layout.addWidget(skill_level_button, self.row, 1)
@@ -635,26 +665,29 @@ class Skills_list(QFrame):
 
 
 
-            self.skill_buttons[skill.name] = skill_information_window
             self.row += 1
-    def update_frames(self):
-        self._name.setText(self.stat.name)
-        self._level.setText(str(self.stat.level))
-        if self.parent_stat:
-            self.parent_stat.update_frames()
+    def update_frames(self, skill):
+        skill: dict
+        #print(skill['skill'])
+        
+        skill['name'].setText(skill['skill'].name)
+        skill['level'].setText(str(skill['skill'].level))
+        skill['basics'].setText(str(skill['skill'].basics))
+        skill['mastery'].setText(skill['skill'].mastery.name)
+        skill['tagged stats'].setText('Tagged\nStats')
+        skill['multiplier'].setText(str(skill['skill'].stat_multiplier))
     #def update_frames(self, skill):
         #working_skill = self.skill_buttons[skill.name] 
         #working_skill : 
         
 
-        pass
 
     def print_skill_name(self, n):
         print(n)
     
     def print_level_name(self, level):
         print(level)
-class SkillFrame(QLabel):
+class SkillFrame(QWidget):
     def __init__(self, 
                  parent: Skills_list,
                  character: Character,
@@ -663,54 +696,45 @@ class SkillFrame(QLabel):
         self._parent = parent
         self.character = character
         self.skill = skill
-        self._layout = QGridLayout()
-        self._layout.setSpacing(0)
-        skill_information_window = SkillInformation(self, 
-                                                    self.character,
-                                                    skill=self.skill)
-        skill_name = skill.name
+
+        self.skill_frame_layout = QHBoxLayout
+        self.setLayout(self.skill_frame_layout)
+        self.skill_frame_layout.setSpacing(0)
         button_height = 70
-        print(skill_name)
         skill_name_button = QPushButton(skill.name)
         skill_level_button = QPushButton(str(skill.level))
         skill_basics_button = QPushButton(str(skill.basics))
         skill_mastery_button = QPushButton(skill.mastery.name)
         skill_tagged_stats = QPushButton("tagged\nskills")
         skill_multipliable = QPushButton(str(skill.stat_multiplier))
-    
-        self.setFixedHeight(button_height+5)
+
         skill_name_button.setFixedHeight(button_height)
         skill_level_button.setFixedHeight(button_height)
         skill_basics_button.setFixedHeight(button_height)
         skill_mastery_button.setFixedHeight(button_height)
         skill_tagged_stats.setFixedHeight(button_height)
         skill_multipliable.setFixedHeight(button_height)
-        
-        skill_name_button.clicked.connect(lambda checked=True, name=skill.name: print(name))
-        skill_level_button.clicked.connect(lambda checked=True, level=skill.level: print(level))
-        skill_basics_button.clicked.connect(lambda checked=True, basics=skill.basics: print(basics))
-        skill_mastery_button.clicked.connect(skill_information_window.show)
 
-        self._layout.addWidget(skill_name_button,0, 0 )
-        self._layout.addWidget(skill_level_button, 0, 1)
-        self._layout.addWidget(skill_basics_button, 0, 2)
-        self._layout.addWidget(skill_mastery_button, 0, 3)
-        self._layout.addWidget(skill_tagged_stats, 0, 4)
-        self._layout.addWidget(skill_multipliable, 0, 5)
-        self.setLayout(self._layout)
-        self.sheet = """QLabel {padding : 0px;
-                                margine : 0px;
-                                  }"""
-    
-    
-    def update_frames(self):
-        pass
-        #self._name.setText(self.stat.name)
-        #self._level.setText(str(self.stat.level))
-        ##if self.parent_stat:
-        #    self.parent_stat.update_frames()
+        skill_information_window = SkillInformation(self, character=self.character, skill= skill)
+        self.skill_buttons[skill.name] = skill_information_window
 
-    pass
+        #skill_name_button.clicked.connect(skill_information_window.show)
+        skill_level_button.clicked.connect(skill_information_window.show)
+
+        #skill_basics_button.clicked.connect(skill_information_window.show)
+        #skill_mastery_button.clicked.connect(skill_information_window.show)
+
+        self.skill_frame_layout.addWidget(skill_name_button,0, 0 )
+        self.skill_frame_layout.addWidget(skill_level_button, 0, 1)
+        self.skill_frame_layout.addWidget(skill_basics_button, 0, 2)
+        self.skill_frame_layout.addWidget(skill_mastery_button, 0, 3)
+        self.skill_frame_layout.addWidget(skill_tagged_stats, 0, 4)
+        self.skill_frame_layout.addWidget(skill_multipliable ,0, 5)
+
+        self._parent.row += 1
+
+
+
 
 class SkillInformation(QMainWindow):
     def __init__(self,
@@ -748,6 +772,9 @@ class SkillInformation(QMainWindow):
     def increase_skill_level(self):
         self.character.increase_stat_or_skill_level(stat=self._skill)
         self.update_window_information()
+        self._parent.update_frames(skill = self._parent.skill_buttons[self._skill.name])
+        #print(self._skill.name)
+        #print(self._parent.skill_buttons[self._skill.name]['skill'])
 
     def update_window_information(self):
         self.usable_mana.setValue(self.character.condensed_mana.level)
@@ -761,7 +788,6 @@ class SkillInformation(QMainWindow):
         if self.character.condensed_mana.level >= self.stat.mana_to_next_level:
             self.character.increase_stat_or_skill_level(self.stat)
             self.update_window_information()
-            self._parent.update_frames()
             self._parent._parent.condensed_mana.update_frames()
             self._parent._parent.level.update_frames()
 
@@ -778,9 +804,13 @@ class MainStatFrame(QLabel):
         self._character = character
         self._parent = parent
         self.parent_stat = parent_stat
-        if isinstance(self.stat, Stat) or isinstance(self.stat, MajorStat):
+        if isinstance(self.stat, MajorStat):
             self.statname = self.stat.name
             self.statlevel = self.stat.level
+        
+        elif isinstance(self.stat, Stat):
+            self.statname = self.stat.name
+            self.statlevel = self.stat.effective_level
             
         elif isinstance(self.stat, str):
             self.statname = self._character.max_mana.name

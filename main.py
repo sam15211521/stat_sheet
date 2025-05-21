@@ -14,12 +14,18 @@ abs_file_path = os.path.join(cur_path, file_path)
 def clearscreen():
     os.system('cls')
 ####################
-ben = Character("Ben",body_mana_multiplier=2722) #hiden stat = 15.327
+ben = Character(name="Ben", body_mana_multiplier=4989.920)
 
 #print(ben.skills_level.dict_of_skills)
-ben.add_skill(Skill('Mana Circulation'))
+ben.add_skill(Skill('Energy Circulation', stat_increase_multiplier=0.0003))
 ben.add_condensed_mana(50)
-ben.add_skill(Skill('Mana Condensing'))
+#ben.add_skill(Skill('Energy Conversion', stat_increase_multiplier=0.0003))
+#ben.add_skill(Skill('Mana Shot'))
+#ben.add_skill(Skill('Energy Channeling', stat_increase_multiplier=0.0002))
+#ben.add_skill(Skill('Mana Condensing'))
+#ben.add_skill(Skill('Fast Thought'))
+#ben.add_skill(Skill('Acrobatics'))
+#ben.add_skill(Skill('Sprinting'))
 
 
 #print(ben.dict_of_skills)

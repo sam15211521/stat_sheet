@@ -26,6 +26,7 @@ class Attribute():
 
         self._attribute_dictionary[self._name] = self
         self._affects_mana_capacity = mana_capacity_flag
+        self.original_mana_multiplier = self.mana_capasity_multiplier
         
     
     def __str__(self):
@@ -125,7 +126,7 @@ class Attribute():
         #need an initial value based on the type of skill
         # will be multiplied by level
         if self.affects_mana_capacity:
-            self.mana_capasity_multiplier= round(self.mana_capasity_multiplier * 1.01 ** self.level,2)
+            self.mana_capasity_multiplier= round(self.original_mana_multiplier * 1.01 ** self.level,4)
 
 class MajorStat(Attribute):
     def __init__(self, name='', discription='', mana_multiplier= 1, mana_capacity_flag=False):
@@ -310,7 +311,7 @@ class Skill(Attribute):
                  mana_capacity_flag=False, 
                  level=0,
                  tagged_stats = [],
-                 stat_increase_multiplier=1):
+                 stat_increase_multiplier=0):
         super().__init__(name, discription, mana_multiplier, mana_capacity_flag, level)
         self._basics = False
         self._mastery = basic
@@ -318,6 +319,7 @@ class Skill(Attribute):
         self._tagged_stats = {}
         self._stat_increase_multiplier = stat_increase_multiplier
         self._stat_multiplier = self.mastery.multiplier
+        self.original_mana_multiplier = self.mana_capasity_multiplier
     @property
     def tagged_stats(self):
         return self._tagged_stats
@@ -388,10 +390,10 @@ class Skill(Attribute):
     
     def calculate_stat_multiplier(self):
         # statincrease_multi ** (level *mastery_multiplier) 
-        if self._stat_increase_multiplier > 1:
+        if self._stat_increase_multiplier >= 1:
             return
         else:
-            self.stat_multiplier = round((1 + self._stat_increase_multiplier) **(self.level * self.mastery.multiplier), 8)
+            self.stat_multiplier = round((1 + (self._stat_increase_multiplier * self.mastery.multiplier)) **(self.level), 8)
         
             
     
@@ -399,8 +401,11 @@ class Skill(Attribute):
         #need an initial value based on the type of skill
         # will be multiplied by level
         #mastery multiplier will 
+        
         if self.affects_mana_capacity:
-            self.mana_capasity_multiplier = round(self.mana_capasity_multiplier * 1.01 ** (self.level* self.mastery.multiplier),2)
+
+            self.mana_capasity_multiplier = round(self.original_mana_multiplier * 1.001 ** (self.level* self.mastery.multiplier),2)
+            print(self.name, self.mana_capasity_multiplier, sep=' | ')
 
 
 class SkillStat(Attribute):

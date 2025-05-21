@@ -3,7 +3,10 @@ import math
 
 class Character():
     _dict_of_characters = {} 
-    def __init__(self, name = '', race = '', body_mana_multiplier = 54433106):
+    def __init__(self, 
+                 name = '', 
+                 race = '', 
+                 body_mana_multiplier = None):
         self._dict_of_kills = {}
         self._dict_of_skills = {}
         self._dict_of_major_stats = {}
@@ -14,6 +17,10 @@ class Character():
         self._stat_strengthening_increaser = 1.01
         self._name = name
         self._race = race
+        if body_mana_multiplier is None:
+            self._body_mana_stat = 99798405
+        else:
+            self._body_mana_stat = body_mana_multiplier
 
         self._stats_and_skills_effecting_mana = {}
 
@@ -28,7 +35,12 @@ class Character():
 
         self._hidden_mana_stat = HiddenManaStat("Base Mana Capacity", 
                                            mana_capacity_flag=True,)
-        self.hidden_mana_stat.level = body_mana_multiplier
+        self.hidden_mana_stat.level = self._body_mana_stat
+        #print("ben hidden mana stat:", 
+              #body_mana_multiplier,
+              #self._body_mana_stat,
+              #self.hidden_mana_stat.level, 
+              #sep= ' | ')
         
 
         #regular stats
@@ -41,7 +53,7 @@ class Character():
                                       is_taggable=True)
         self.magical_strength = Stat(name = "Mana Strength",
                                      mana_capacity_flag=True,
-                                     mana_multiplier=1.5,
+                                     mana_multiplier=1.001,
                                      is_taggable=True)
         self.strength.add_child_stat(self.physical_strength, 
                                      self.magical_strength)
@@ -54,6 +66,7 @@ class Character():
                                      is_taggable=True)
         self.magic_resistance = Stat(name="Mana Resistance",
                                      mana_capacity_flag=True,
+                                     mana_multiplier=1.001,
                                      is_taggable=True)
         self.spiritual_resistance = Stat(name="Spiritual Resistance",
                                      is_taggable=True)
@@ -69,6 +82,7 @@ class Character():
                                      is_taggable=True)
         self.mana_regen= Stat(name="Mana Regeneration",
                               mana_capacity_flag=True,
+                              mana_multiplier=1.0001,
                                      is_taggable=True)
         self.regeneration.add_child_stat(self.health_regen,
                                          self.mana_regen)
@@ -81,6 +95,7 @@ class Character():
                                      is_taggable=True)
         self.magic_endurance = Stat(name="Magic_Endurance",
                                     mana_capacity_flag=True,
+                                    mana_multiplier=1.01,
                                      is_taggable=True)
         self.endurance.add_child_stat(self.physical_endurance,
                                       self.magic_endurance)
@@ -99,7 +114,7 @@ class Character():
         #Energy potential
         self.energy_potential = Stat(name= "Energy Potential", 
                                      mana_capacity_flag=True,
-                                     mana_multiplier=1.5,
+                                     mana_multiplier=1.01,
                                      affects_character_level=True)
         
         # Stat affected by all skills
@@ -368,9 +383,16 @@ class Character():
         stat_skill_multipliers = []
         
         for stat_skill in self.stats_and_skills_effecting_mana.values():
+            print(stat_skill.name, stat_skill.mana_capasity_multiplier, sep=' :: ')
             stat_skill_multipliers.append(stat_skill.mana_capasity_multiplier)
+        print(stat_skill_multipliers)
         mana_multiplier = math.prod(stat_skill_multipliers)
-        mana_capacity = (self.hidden_mana_stat.level * (mana_multiplier** self.energy_potential.mana_capasity_multiplier))
+        mana_capacity = math.floor((self.hidden_mana_stat.level * (mana_multiplier** self.energy_potential.mana_capasity_multiplier)))
+        print('capacity  = hidden * multipliers ** potential')
+        print(f"{mana_capacity} = ({self.hidden_mana_stat.level} * ({mana_multiplier} ** {self.energy_potential.mana_capasity_multiplier}))")
+        print()
+        
+
         if mana_capacity >1000000:
             mana_capacity/= 1000000
             self.max_mana.mana_unit = "Mp"
@@ -451,8 +473,8 @@ class Character():
                 self.increase_stat_level(stat=stat, level=level)
             elif stat.name in self.skills_level.dict_of_skills:
                 self.increase_skill_level(skill=stat, level = level)
-        self.calculate_max_mana()
-        self.calculate_effective_stat_level()
+            self.calculate_max_mana()
+            self.calculate_effective_stat_level()
     
     def check_if_con_mana_more_than_stat(self,skill_stat: Skill | Stat):
         returnstat =  self.condensed_mana.level > skill_stat.mana_to_next_level
