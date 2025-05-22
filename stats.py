@@ -196,7 +196,7 @@ class Stat(Attribute):
         self._parent_stat = None
         self._power = 1
         self._affects_character_level = affects_character_level
-        self._effective_level = 1
+        self._effective_level = 0
         self._skills_effecting_stat ={}
     @property
     def effective_level(self):
@@ -271,6 +271,7 @@ class Stat(Attribute):
                 self.parent_stat.level = None #just need it to equal to something
         else:
             self._level = floor(self.average_levels())
+            #self.effective_level = floor(self.average_effective_levels())
             if isinstance(self.parent_stat, Stat):
                 self.parent_stat.level = None
                 self.power = None
@@ -298,7 +299,22 @@ class Stat(Attribute):
     # used to calculate the level of a parent stat based on 
     # the average of the levels of the childstats
     def average_levels(self):
-        return mean(stat.level for name, stat in self.child_stats.items())
+        levels = []
+        for name, stat in self.child_stats.items():
+            levels.append(stat.level)
+        #print(levels)
+        return mean(levels)
+
+    def average_effective_levels(self):
+        effectivelevels = []
+        for name, stat in self.child_stats.items():
+            print(stat.name, stat.level, "@@@@@@@@@@@@@@@@@")
+            stat: Stat
+            effectivelevels.append(stat.effective_level)
+        #print('effective',effectivelevels)
+        print('parent stat average level:',mean(effectivelevels))
+        self.effective_level = floor(mean(effectivelevels))
+        #return mean(effectivelevels)
     
     def level_overide(self, level_increase):
         pass
@@ -405,7 +421,7 @@ class Skill(Attribute):
         if self.affects_mana_capacity:
 
             self.mana_capasity_multiplier = round(self.original_mana_multiplier * 1.001 ** (self.level* self.mastery.multiplier),2)
-            print(self.name, self.mana_capasity_multiplier, sep=' | ')
+            #print(self.name, self.mana_capasity_multiplier, sep=' | ')
 
 
 class SkillStat(Attribute):

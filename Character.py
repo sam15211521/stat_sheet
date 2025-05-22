@@ -337,6 +337,8 @@ class Character():
                 stat_multiplier *= skill.stat_multiplier
                 #print(stat.name, stat_multiplier, sep= '\n')
             stat.effective_level = math.floor(stat.level * stat_multiplier)
+            if stat._isparent:
+                stat.average_effective_levels()
 
 
             
@@ -383,14 +385,14 @@ class Character():
         stat_skill_multipliers = []
         
         for stat_skill in self.stats_and_skills_effecting_mana.values():
-            print(stat_skill.name, stat_skill.mana_capasity_multiplier, sep=' :: ')
+        #    print(stat_skill.name, stat_skill.mana_capasity_multiplier, sep=' :: ')
             stat_skill_multipliers.append(stat_skill.mana_capasity_multiplier)
-        print(stat_skill_multipliers)
+        #print(stat_skill_multipliers)
         mana_multiplier = math.prod(stat_skill_multipliers)
         mana_capacity = math.floor((self.hidden_mana_stat.level * (mana_multiplier** self.energy_potential.mana_capasity_multiplier)))
-        print('capacity  = hidden * multipliers ** potential')
-        print(f"{mana_capacity} = ({self.hidden_mana_stat.level} * ({mana_multiplier} ** {self.energy_potential.mana_capasity_multiplier}))")
-        print()
+        #print('capacity  = hidden * multipliers ** potential')
+        #print(f"{mana_capacity} = ({self.hidden_mana_stat.level} * ({mana_multiplier} ** {self.energy_potential.mana_capasity_multiplier}))")
+        #print()
         
 
         if mana_capacity >1000000:
@@ -457,6 +459,7 @@ class Character():
 ### Need to edit the way that a stat level is increased and decreased as it is confusing and prone to mistakes due to calculating the level first
     #this function checks if the stat is a Stat or Skill then calls a function to increas the stat level
     def increase_stat_or_skill_level(self, stat, level=1):
+        print(stat.name,  "############")
         quit_flag = False
         if not isinstance(stat, Stat) and not isinstance(stat, Skill):
             print( "Type Error: selected stat is not a type <Stat> or <Skill>.")
@@ -468,13 +471,22 @@ class Character():
         if quit_flag:
             return False
         else:
-            if stat.name in self.dict_of_stats and not stat.isparent:
+            if stat.name in self.dict_of_stats:
                 #print(f'{stat.name} in self.dict_of_stats and is not a parent')
-                self.increase_stat_level(stat=stat, level=level)
+                if not stat.isparent:
+                    print("Stat:", stat.name)
+                    self.increase_stat_level(stat=stat, level=level)
+                else:
+                    self.increase_stat_level(stat=stat, level=level)
+
             elif stat.name in self.skills_level.dict_of_skills:
                 self.increase_skill_level(skill=stat, level = level)
             self.calculate_max_mana()
             self.calculate_effective_stat_level()
+            for stats in self.dict_of_stats.values():
+                stats : Stat
+                #if isinstance(stats, Stat):
+                #    print(stats.name, stats.level, stats.effective_level, sep=' | ')
     
     def check_if_con_mana_more_than_stat(self,skill_stat: Skill | Stat):
         returnstat =  self.condensed_mana.level > skill_stat.mana_to_next_level
@@ -507,11 +519,15 @@ class Character():
 
     def increase_stat_level(self, stat=  Stat, level=1):
         for _ in range(level):
+            stat : Stat
+            print(stat.name, "&*^)(*^)*&^")
             #print(f'\n{stat.name} Level: {stat.level}\n total_mana: {self.condensed_mana.level}\n mana_requirement: {stat.mana_to_next_level}\n actual_mana_requirement: {stat.actual_mana_to_next_level}')
             if self.check_if_con_mana_more_than_stat(skill_stat=stat,):
                 self.use_condensed_mana(stat.mana_to_next_level)
                 self.increase_next_level_requirement(stat=stat, level = 1)
                 stat.level += 1
+                if stat.isparent:
+                    print("stat", stat.name, 'is a parent')
         #print(f'\n{stat.name} Level: {stat.level}\n total_mana: {self.condensed_mana.level}\n mana_requirement: {stat.mana_to_next_level}\n actual_mana_requirement: {stat.actual_mana_to_next_level}')
         #self.calculate_effective_stat_level(stat)
         self.calculate_character_level()
@@ -520,7 +536,8 @@ class Character():
         next_actual_level_requirement = stat.actual_mana_to_next_level * (self.mana_requirement_increaser ** level)
         stat.actual_mana_to_next_level = next_actual_level_requirement
 
-#a = Character("BB")
+a = Character("BB")
+print(a.regeneration.effective_level)
 #a.add_condensed_mana(500)
 #a.increase_stat_or_skill_level(a.physical_strength,8)
 ##print(a.physical_strength.level)
